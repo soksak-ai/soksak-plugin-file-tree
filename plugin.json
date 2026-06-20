@@ -1,19 +1,19 @@
 {
   "spec": "soksak-plugin-spec@1",
-  "id": "soksak-plugin-files",
+  "id": "soksak-plugin-file-tree",
   "name": {
-    "ko": "파일",
-    "en": "Files"
+    "ko": "파일 트리",
+    "en": "File Tree"
   },
   "version": "0.1.0",
-  "repo": "https://github.com/soksak-ai/soksak-plugin-files.git",
+  "repo": "https://github.com/soksak-ai/soksak-plugin-file-tree.git",
   "description": {
-    "ko": "파일 탐색기(좌측 사이드바 트리) + 미디어 뷰어(이미지·PDF·영상·오디오). 셸 cwd 추종 토글. 코드 파일은 에디터 플러그인에 위임.",
-    "en": "File explorer (left sidebar tree) plus media viewers (image, PDF, video, audio). Optional shell-cwd follow toggle. Code files are delegated to the editor plugin."
+    "ko": "좌측 사이드바 파일 탐색기 트리. 셸 cwd 추종 토글, git 데코레이션. 파일 열기는 코어 editor.open 으로 위임(에디터/미디어 뷰어가 렌더).",
+    "en": "Left sidebar file explorer tree. Shell-cwd follow toggle and git decorations. Opening a file is delegated to the core editor.open command (editor / media viewers render it)."
   },
   "entry": "main.js",
   "dependencies": {
-    "soksak-plugin-editor": "*"
+    "soksak-plugin-editor-codemirror": "*"
   },
   "permissions": ["ui", "fs:read", "git:read", "terminal", "data", "commands"],
   "contributes": {
@@ -25,12 +25,6 @@
         "placements": ["sidebar-left"],
         "defaultPlacement": "sidebar-left"
       }
-    ],
-    "fileViewers": [
-      { "id": "image", "extensions": ["png", "jpg", "jpeg", "gif", "webp", "bmp", "ico", "avif", "apng"], "priority": 10 },
-      { "id": "pdf", "extensions": ["pdf"], "priority": 10 },
-      { "id": "video", "extensions": ["mp4", "webm", "mov", "m4v", "ogv", "mkv"], "priority": 10 },
-      { "id": "audio", "extensions": ["mp3", "wav", "ogg", "flac", "m4a", "aac"], "priority": 10 }
     ],
     "commands": [
       { "name": "ping", "title": { "ko": "적재/버전 확인(E2E)", "en": "Ping (load/version check)" } },

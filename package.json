@@ -1,9 +1,9 @@
 {
-  "name": "soksak-plugin-files",
+  "name": "soksak-plugin-file-tree",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "soksak files plugin — file explorer tree + media viewers",
+  "description": "soksak file-tree plugin — left sidebar file explorer tree",
   "scripts": {
     "build": "node build.mjs",
     "dev": "node build.mjs --watch",
