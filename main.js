@@ -21889,17 +21889,13 @@ var EN = {
   loading: "Loading\u2026",
   refresh: "Refresh",
   followOn: "Follow terminal cwd (on)",
-  followOff: "Follow terminal cwd (off \u2014 project root)",
-  imgFail: "Failed to load image",
-  binFail: "Failed to load file"
+  followOff: "Follow terminal cwd (off \u2014 project root)"
 };
 var KO = {
   loading: "\uBD88\uB7EC\uC624\uB294 \uC911\u2026",
   refresh: "\uC0C8\uB85C\uACE0\uCE68",
   followOn: "\uD130\uBBF8\uB110 cwd \uCD94\uC885(\uCF1C\uC9D0)",
-  followOff: "\uD130\uBBF8\uB110 cwd \uCD94\uC885(\uAEBC\uC9D0 \u2014 \uD504\uB85C\uC81D\uD2B8 \uB8E8\uD2B8)",
-  imgFail: "\uC774\uBBF8\uC9C0\uB97C \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4",
-  binFail: "\uD30C\uC77C\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4"
+  followOff: "\uD130\uBBF8\uB110 cwd \uCD94\uC885(\uAEBC\uC9D0 \u2014 \uD504\uB85C\uC81D\uD2B8 \uB8E8\uD2B8)"
 };
 function t3(key, lang) {
   const dict = lang === "ko" ? KO : EN;
@@ -22307,57 +22303,6 @@ function Tree({ app, ctx }) {
   ] });
 }
 
-// src/media.tsx
-var import_react5 = __toESM(require_react(), 1);
-var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
-function MediaViewer({
-  app,
-  ctx,
-  kind
-}) {
-  const lang = app.locale();
-  const [url, setUrl] = (0, import_react5.useState)(null);
-  const [error, setError] = (0, import_react5.useState)(null);
-  (0, import_react5.useEffect)(() => {
-    let cancelled = false;
-    setUrl(null);
-    setError(null);
-    const read = app.fs?.readBinary;
-    if (!read) {
-      setError("fs:read \uAD8C\uD55C \uC5C6\uC74C");
-      return;
-    }
-    read(ctx.path).then((d3) => {
-      if (!cancelled) setUrl(`data:${d3.mime};base64,${d3.base64}`);
-    }).catch((e3) => {
-      if (!cancelled) setError(String(e3));
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [app, ctx.path]);
-  if (error) {
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "sk-fmedia", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("span", { className: "sk-fmedia-msg", children: [
-      t3(kind === "image" ? "imgFail" : "binFail", lang),
-      " \u2014 ",
-      error
-    ] }) });
-  }
-  if (!url) {
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "sk-fmedia", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "sk-fmedia-msg", children: t3("loading", lang) }) });
-  }
-  if (kind === "image") {
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "sk-fmedia", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("img", { className: "sk-fmedia-img", src: url, alt: "" }) });
-  }
-  if (kind === "pdf") {
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "sk-fmedia", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("embed", { className: "sk-fmedia-embed", src: url, type: "application/pdf" }) });
-  }
-  if (kind === "video") {
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "sk-fmedia", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("video", { className: "sk-fmedia-video", src: url, controls: true }) });
-  }
-  return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "sk-fmedia", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("audio", { src: url, controls: true }) });
-}
-
 // src/styles.ts
 var GLOBAL_CSS = `
 .sk-files {
@@ -22401,21 +22346,6 @@ var GLOBAL_CSS = `
 .sk-files-btn.on { color: var(--accent, #6cf); }
 .sk-files-body { flex: 1; min-height: 0; overflow: auto; }
 .sk-files-msg { padding: 12px; color: var(--text-3, #888); font-size: 12px; }
-
-.sk-fmedia {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: auto;
-  padding: 16px;
-  background: var(--bg, #1e1e1e);
-  color: var(--text-2, #bbb);
-}
-.sk-fmedia-img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.sk-fmedia-embed, .sk-fmedia-video { width: 100%; height: 100%; border: 0; }
-.sk-fmedia-msg { color: var(--text-3, #888); font-size: 13px; }
 `;
 
 // src/commands.ts
@@ -22484,8 +22414,8 @@ function registerCommands(ctx) {
 }
 
 // src/plugin-entry.tsx
-var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
-var STYLE_ID = "sk-files-style";
+var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+var STYLE_ID = "sk-file-tree-style";
 function ensureStyle() {
   if (document.getElementById(STYLE_ID)) return;
   const s3 = document.createElement("style");
@@ -22514,12 +22444,6 @@ function unmountContainer(container) {
   }
   container.replaceChildren();
 }
-var MEDIA = [
-  { id: "image", kind: "image" },
-  { id: "pdf", kind: "pdf" },
-  { id: "video", kind: "video" },
-  { id: "audio", kind: "audio" }
-];
 var plugin_entry_default = {
   activate(ctx) {
     const app = ctx.app;
@@ -22528,27 +22452,13 @@ var plugin_entry_default = {
       ctx.subscriptions.push(
         app.ui.registerView("tree", {
           mount(container, vctx) {
-            mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Tree, { app, ctx: vctx }));
+            mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx }));
           },
           unmount(container) {
             unmountContainer(container);
           }
         })
       );
-    }
-    if (app.ui?.registerFileViewer) {
-      for (const { id, kind } of MEDIA) {
-        ctx.subscriptions.push(
-          app.ui.registerFileViewer(id, {
-            mount(container, fctx) {
-              mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(MediaViewer, { app, ctx: fctx, kind }));
-            },
-            unmount(container) {
-              unmountContainer(container);
-            }
-          })
-        );
-      }
     }
     registerCommands(ctx);
   },

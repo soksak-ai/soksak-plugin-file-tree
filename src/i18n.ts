@@ -6,8 +6,6 @@ const EN: Dict = {
   refresh: "Refresh",
   followOn: "Follow terminal cwd (on)",
   followOff: "Follow terminal cwd (off — project root)",
-  imgFail: "Failed to load image",
-  binFail: "Failed to load file",
 };
 
 const KO: Dict = {
@@ -15,8 +13,6 @@ const KO: Dict = {
   refresh: "Refresh",
   followOn: "Follow terminal cwd (on)",
   followOff: "Follow terminal cwd (off — project root)",
-  imgFail: "The image could not be loaded",
-  binFail: "The file could not be loaded",
 };
 
 export function t(key: string, lang: string): string {

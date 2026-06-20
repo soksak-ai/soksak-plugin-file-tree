@@ -28,8 +28,8 @@ const opts = {
 if (process.argv.includes("--watch")) {
   const ctx = await context(opts);
   await ctx.watch();
-  console.log("[files] watching src → main.js …");
+  console.log("[file-tree] watching src → main.js …");
 } else {
   await build(opts);
-  console.log("[files] built main.js");
+  console.log("[file-tree] built main.js");
 }
