@@ -18,20 +18,6 @@ export interface PluginViewProvider {
   unmount?(container: HTMLElement): void;
 }
 
-// 코어 fileViewerRegistry.FileViewerContext 와 동형.
-export interface FileViewerContext {
-  viewId: string;
-  path: string;
-  projectId: string;
-  root: string | null;
-  setDirty: (dirty: boolean) => void;
-}
-
-export interface FileViewerProvider {
-  mount(container: HTMLElement, ctx: FileViewerContext): void;
-  unmount?(container: HTMLElement): void;
-}
-
 export interface ParamSpec {
   type: string;
   description?: string;
@@ -71,15 +57,10 @@ export interface PluginApi {
   };
   ui?: {
     registerView: (viewId: string, provider: PluginViewProvider) => Disposable;
-    registerFileViewer: (
-      viewerId: string,
-      provider: FileViewerProvider,
-    ) => Disposable;
   };
   fs?: {
     list?: (path: string, opts?: { meta?: boolean }) => Promise<unknown>;
     watch?: (dir: string, cb: (dir: string) => void) => Disposable;
-    readBinary?: (path: string) => Promise<{ mime: string; base64: string }>;
   };
   git?: {
     status?: (path?: string) => Promise<unknown>;
