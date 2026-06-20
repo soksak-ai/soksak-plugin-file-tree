@@ -1,0 +1,42 @@
+{
+  "spec": "soksak-plugin-spec@1",
+  "id": "soksak-plugin-files",
+  "name": {
+    "ko": "파일",
+    "en": "Files"
+  },
+  "version": "0.1.0",
+  "repo": "https://github.com/soksak-ai/soksak-plugin-files.git",
+  "description": {
+    "ko": "파일 탐색기(좌측 사이드바 트리) + 미디어 뷰어(이미지·PDF·영상·오디오). 셸 cwd 추종 토글. 코드 파일은 에디터 플러그인에 위임.",
+    "en": "File explorer (left sidebar tree) plus media viewers (image, PDF, video, audio). Optional shell-cwd follow toggle. Code files are delegated to the editor plugin."
+  },
+  "entry": "main.js",
+  "dependencies": {
+    "soksak-plugin-editor": "*"
+  },
+  "permissions": ["ui", "fs:read", "git:read", "terminal", "data", "commands"],
+  "contributes": {
+    "views": [
+      {
+        "id": "tree",
+        "title": { "ko": "파일", "en": "Files" },
+        "icon": "📁",
+        "placements": ["sidebar-left"],
+        "defaultPlacement": "sidebar-left"
+      }
+    ],
+    "fileViewers": [
+      { "id": "image", "extensions": ["png", "jpg", "jpeg", "gif", "webp", "bmp", "ico", "avif", "apng"], "priority": 10 },
+      { "id": "pdf", "extensions": ["pdf"], "priority": 10 },
+      { "id": "video", "extensions": ["mp4", "webm", "mov", "m4v", "ogv", "mkv"], "priority": 10 },
+      { "id": "audio", "extensions": ["mp3", "wav", "ogg", "flac", "m4a", "aac"], "priority": 10 }
+    ],
+    "commands": [
+      { "name": "ping", "title": { "ko": "적재/버전 확인(E2E)", "en": "Ping (load/version check)" } },
+      { "name": "open", "title": { "ko": "파일 열기", "en": "Open File" } },
+      { "name": "refresh", "title": { "ko": "새로고침", "en": "Refresh" } },
+      { "name": "follow", "title": { "ko": "cwd 추종 토글", "en": "Toggle cwd Follow" } }
+    ]
+  }
+}
