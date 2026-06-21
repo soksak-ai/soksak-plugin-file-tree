@@ -12,9 +12,6 @@
     "en": "Left sidebar file explorer tree. Shell-cwd follow toggle and git decorations. Opening a file is delegated to the core editor.open command (editor / media viewers render it)."
   },
   "entry": "main.js",
-  "dependencies": {
-    "soksak-plugin-editor-codemirror": "*"
-  },
   "permissions": ["ui", "fs:read", "git:read", "terminal", "data", "commands"],
   "contributes": {
     "views": [

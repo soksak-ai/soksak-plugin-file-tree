@@ -28,7 +28,10 @@ host through CSS variables and `theme.changed`.
 
 ## Dependencies
 
-`soksak-plugin-editor-codemirror` — the default viewer for the code/text files this tree opens.
+None. The tree opens files only through the core `editor.open` command; whatever file
+viewer is installed (an editor engine, the media viewer, …) renders them. The tree is not
+tied to any specific viewer engine (A13). Install a viewer plugin separately to see opened
+files; with none installed, opening a file shows an empty viewer.
 
 ## Build
 
