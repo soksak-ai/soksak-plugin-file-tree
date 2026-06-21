@@ -6,8 +6,8 @@ export const GLOBAL_CSS = `
   display: flex;
   flex-direction: column;
   background: var(--bg, #1e1e1e);
-  color: var(--text, #ddd);
-  font: 12px var(--font-ui, system-ui, sans-serif);
+  color: var(--fg, #ddd);
+  font: 12px var(--app-font, system-ui, sans-serif);
   overflow: hidden;
 }
 .sk-files-header {
@@ -16,12 +16,12 @@ export const GLOBAL_CSS = `
   align-items: center;
   gap: 6px;
   padding: 4px 8px;
-  border-bottom: 1px solid var(--border, #333);
+  border-bottom: 1px solid var(--bd, #333);
 }
 .sk-files-title {
   flex: 1;
   font-weight: 600;
-  color: var(--text-2, #bbb);
+  color: var(--fg2, #bbb);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -30,15 +30,15 @@ export const GLOBAL_CSS = `
   flex: none;
   border: none;
   background: transparent;
-  color: var(--text-2, #aaa);
+  color: var(--fg2, #aaa);
   cursor: pointer;
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 13px;
   line-height: 1;
 }
-.sk-files-btn:hover { background: var(--surface-2, #333); }
-.sk-files-btn.on { color: var(--accent, #6cf); }
+.sk-files-btn:hover { background: var(--inset, #333); }
+.sk-files-btn.on { color: var(--acc, #6cf); }
 .sk-files-body { flex: 1; min-height: 0; overflow: auto; }
-.sk-files-msg { padding: 12px; color: var(--text-3, #888); font-size: 12px; }
+.sk-files-msg { padding: 12px; color: var(--fg3, #888); font-size: 12px; }
 `;
