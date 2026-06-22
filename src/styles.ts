@@ -13,10 +13,14 @@ export const GLOBAL_CSS = `
 }
 .sk-files-header {
   flex: none;
+  /* The second band — the same height as the content view-tab band. The host injects the
+     variable, so both sides of the grid line up at the same Y. */
+  height: var(--header-h, 33px);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 0 8px;
   border-bottom: 1px solid var(--bd, #333);
 }
 .sk-files-title {
@@ -29,15 +33,21 @@ export const GLOBAL_CSS = `
 }
 .sk-files-btn {
   flex: none;
+  /* The host's own .icon-btn pattern — a square flex box with the svg centred, which takes the
+     glyph baseline out of the arithmetic. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
   border: none;
   background: transparent;
   color: var(--fg2, #aaa);
   cursor: pointer;
   border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 13px;
-  line-height: 1;
 }
+.sk-files-btn svg { width: 18px; height: 18px; display: block; }
 .sk-files-btn:hover { background: var(--inset, #333); }
 .sk-files-btn.on { color: var(--acc, #6cf); }
 .sk-files-body { flex: 1; min-height: 0; overflow: auto; }
