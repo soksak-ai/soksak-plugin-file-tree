@@ -12,10 +12,14 @@ export const GLOBAL_CSS = `
 }
 .sk-files-header {
   flex: none;
+  /* row2 밴드 — 코어 콘텐츠 뷰탭 밴드(--header-h=33)와 동일 높이. 호스트가 좌측 그리드에
+     주입하는 변수를 상속해 좌우 그리드 행이 같은 Y 에서 맞는다. */
+  height: var(--header-h, 33px);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 0 8px;
   border-bottom: 1px solid var(--bd, #333);
 }
 .sk-files-title {
@@ -28,15 +32,20 @@ export const GLOBAL_CSS = `
 }
 .sk-files-btn {
   flex: none;
+  /* 우측 호스트 .icon-btn 과 동일 패턴 — flex 정사각 박스 + svg 중앙정렬(글리프 baseline 문제 제거). */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
   border: none;
   background: transparent;
   color: var(--fg2, #aaa);
   cursor: pointer;
   border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 13px;
-  line-height: 1;
 }
+.sk-files-btn svg { width: 18px; height: 18px; display: block; }
 .sk-files-btn:hover { background: var(--inset, #333); }
 .sk-files-btn.on { color: var(--acc, #6cf); }
 .sk-files-body { flex: 1; min-height: 0; overflow: auto; }

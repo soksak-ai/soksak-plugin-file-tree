@@ -68,6 +68,7 @@ function LazyTree({
   onOpenFile,
   theme,
   gitStatus,
+  onFsChange,
 }: {
   app: PluginApi;
   rootAbs: string;
@@ -75,6 +76,8 @@ function LazyTree({
   onOpenFile: (absPath: string) => void;
   theme: TreeThemeInput;
   gitStatus: GitStatusEntry[];
+  // 워처 reconcile(파일 변경) 발생 시 호출 — 상위가 git 데코레이션을 갱신한다(수동 새로고침 불요).
+  onFsChange?: () => void;
 }) {
   const themeStyles = useMemo(
     () =>
@@ -225,12 +228,16 @@ function LazyTree({
     [applyChildren],
   );
 
-  // reconcileRef: 워처 콜백이 최신 reconcile + 재-list 를 호출.
+  // reconcileRef: 워처 콜백이 최신 reconcile + 재-list 를 호출. 파일 변경은 git 상태도
+  // 바꿀 수 있으므로 데코레이션도 함께 갱신한다(수동 새로고침 불요).
   reconcileRef.current = (rel: string) => {
     const list = appRef.current.fs?.list;
     if (!list || !loaded.current.has(rel)) return;
     void list(absOf(rel))
-      .then((l) => reconcile(rel, (l as Listing).children))
+      .then((l) => {
+        reconcile(rel, (l as Listing).children);
+        onFsChange?.();
+      })
       .catch(() => {});
   };
 
@@ -336,14 +343,17 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
     }
     setCwd(app.terminal?.getCwd?.(paneId));
     const offCwd = app.terminal?.onCwd?.(paneId, (c) => setCwd(c));
+    return () => offCwd?.dispose();
+  }, [app, follow, paneId]);
+
+  // git 데코레이션 자동 갱신 — 터미널 명령 완료 시(follow 무관). 수동 새로고침 버튼 불요.
+  useEffect(() => {
+    if (!paneId) return;
     const offCmd = app.terminal?.onCommandFinished?.(paneId, () =>
       setGitNonce((n) => n + 1),
     );
-    return () => {
-      offCwd?.dispose();
-      offCmd?.dispose();
-    };
-  }, [app, follow, paneId]);
+    return () => offCmd?.dispose();
+  }, [app, paneId]);
 
   const effectiveRoot = (follow ? cwd : undefined) ?? root ?? undefined;
 
@@ -437,7 +447,7 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
 
   return (
     <div className="sk-files">
-      <div className="sk-files-header">
+      <div className="sk-files-header" data-node="header">
         <span className="sk-files-title" title={listing?.root}>
           {baseName(listing?.root) ?? "…"}
         </span>
@@ -445,20 +455,25 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
           <button
             type="button"
             className={`sk-files-btn${follow ? " on" : ""}`}
+            data-node="follow-btn"
             title={translate(follow ? "followOn" : "followOff", lang)}
             onClick={toggleFollow}
           >
-            ⌖
+            {/* lucide "pin" — 켜짐(추종)=핀 고정 메타포. 우측 호스트 아이콘과 같은 선 스타일/크기. */}
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 17v5" />
+              <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+            </svg>
           </button>
         )}
-        <button
-          type="button"
-          className="sk-files-btn"
-          title={translate("refresh", lang)}
-          onClick={() => setNonce((n) => n + 1)}
-        >
-          ⟳
-        </button>
       </div>
       <div className="sk-files-body">
         {error ? (
@@ -472,6 +487,7 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
             onOpenFile={onOpenFile}
             theme={theme}
             gitStatus={gitStatus}
+            onFsChange={() => setGitNonce((n) => n + 1)}
           />
         ) : (
           <div className="sk-files-msg">{translate("loading", lang)}</div>
