@@ -21955,7 +21955,8 @@ function LazyTree({
   initialChildren,
   onOpenFile,
   theme,
-  gitStatus
+  gitStatus,
+  onFsChange
 }) {
   const themeStyles = (0, import_react3.useMemo)(
     () => ({
@@ -22095,7 +22096,10 @@ function LazyTree({
   reconcileRef.current = (rel) => {
     const list = appRef.current.fs?.list;
     if (!list || !loaded.current.has(rel)) return;
-    void list(absOf(rel)).then((l3) => reconcile(rel, l3.children)).catch(() => {
+    void list(absOf(rel)).then((l3) => {
+      reconcile(rel, l3.children);
+      onFsChange?.();
+    }).catch(() => {
     });
   };
   const loadDir = (0, import_react3.useCallback)(
@@ -22178,15 +22182,16 @@ function Tree({ app, ctx }) {
     }
     setCwd(app.terminal?.getCwd?.(paneId));
     const offCwd = app.terminal?.onCwd?.(paneId, (c3) => setCwd(c3));
+    return () => offCwd?.dispose();
+  }, [app, follow, paneId]);
+  (0, import_react3.useEffect)(() => {
+    if (!paneId) return;
     const offCmd = app.terminal?.onCommandFinished?.(
       paneId,
       () => setGitNonce((n2) => n2 + 1)
     );
-    return () => {
-      offCwd?.dispose();
-      offCmd?.dispose();
-    };
-  }, [app, follow, paneId]);
+    return () => offCmd?.dispose();
+  }, [app, paneId]);
   const effectiveRoot = (follow ? cwd : void 0) ?? root ?? void 0;
   (0, import_react3.useEffect)(() => {
     if (!effectiveRoot) {
@@ -22265,26 +22270,32 @@ function Tree({ app, ctx }) {
     return () => clearTree(projectId);
   }, [projectId, setFollowPersist]);
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "sk-files", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "sk-files-header", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "sk-files-header", "data-node": "header", children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "sk-files-title", title: listing?.root, children: baseName(listing?.root) ?? "\u2026" }),
       paneId && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
         "button",
         {
           type: "button",
           className: `sk-files-btn${follow ? " on" : ""}`,
+          "data-node": "follow-btn",
           title: t3(follow ? "followOn" : "followOff", lang),
           onClick: toggleFollow,
-          children: "\u2316"
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        "button",
-        {
-          type: "button",
-          className: "sk-files-btn",
-          title: t3("refresh", lang),
-          onClick: () => setNonce((n2) => n2 + 1),
-          children: "\u27F3"
+          children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
+            "svg",
+            {
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: 2,
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              "aria-hidden": "true",
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("path", { d: "M12 17v5" }),
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("path", { d: "M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" })
+              ]
+            }
+          )
         }
       )
     ] }),
@@ -22296,7 +22307,8 @@ function Tree({ app, ctx }) {
         initialChildren: listing.children,
         onOpenFile,
         theme,
-        gitStatus
+        gitStatus,
+        onFsChange: () => setGitNonce((n2) => n2 + 1)
       },
       listing.root
     ) : /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "sk-files-msg", children: t3("loading", lang) }) })
@@ -22317,10 +22329,14 @@ var GLOBAL_CSS = `
 }
 .sk-files-header {
   flex: none;
+  /* row2 \uBC34\uB4DC \u2014 \uCF54\uC5B4 \uCF58\uD150\uCE20 \uBDF0\uD0ED \uBC34\uB4DC(--header-h=33)\uC640 \uB3D9\uC77C \uB192\uC774. \uD638\uC2A4\uD2B8\uAC00 \uC88C\uCE21 \uADF8\uB9AC\uB4DC\uC5D0
+     \uC8FC\uC785\uD558\uB294 \uBCC0\uC218\uB97C \uC0C1\uC18D\uD574 \uC88C\uC6B0 \uADF8\uB9AC\uB4DC \uD589\uC774 \uAC19\uC740 Y \uC5D0\uC11C \uB9DE\uB294\uB2E4. */
+  height: var(--header-h, 33px);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 0 8px;
   border-bottom: 1px solid var(--bd, #333);
 }
 .sk-files-title {
@@ -22333,15 +22349,20 @@ var GLOBAL_CSS = `
 }
 .sk-files-btn {
   flex: none;
+  /* \uC6B0\uCE21 \uD638\uC2A4\uD2B8 .icon-btn \uACFC \uB3D9\uC77C \uD328\uD134 \u2014 flex \uC815\uC0AC\uAC01 \uBC15\uC2A4 + svg \uC911\uC559\uC815\uB82C(\uAE00\uB9AC\uD504 baseline \uBB38\uC81C \uC81C\uAC70). */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
   border: none;
   background: transparent;
   color: var(--fg2, #aaa);
   cursor: pointer;
   border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 13px;
-  line-height: 1;
 }
+.sk-files-btn svg { width: 18px; height: 18px; display: block; }
 .sk-files-btn:hover { background: var(--inset, #333); }
 .sk-files-btn.on { color: var(--acc, #6cf); }
 .sk-files-body { flex: 1; min-height: 0; overflow: auto; }
