@@ -48,6 +48,6 @@ export const GLOBAL_CSS = `
 .sk-files-btn svg { width: 18px; height: 18px; display: block; }
 .sk-files-btn:hover { background: var(--inset, #333); }
 .sk-files-btn.on { color: var(--acc, #6cf); }
-.sk-files-body { flex: 1; min-height: 0; overflow: auto; }
+.sk-files-body { flex: 1; min-height: 0; overflow: auto; padding: 4px 0; }
 .sk-files-msg { padding: 12px; color: var(--fg3, #888); font-size: 12px; }
 `;
