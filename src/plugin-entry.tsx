@@ -52,6 +52,14 @@ export default {
           mount(container: HTMLElement, vctx: PluginViewContext) {
             mountInto(container, <Tree app={app} ctx={vctx} />);
           },
+          // Only the followed pane changed, so this re-renders into the same root: React
+          // reconciles, the cwd effect runs again, and the tree data stays unless the cwd really
+          // moved. A remount rebuilt all of it — measured at about 36ms every tab switch.
+          update(container: HTMLElement, vctx: PluginViewContext) {
+            const root = roots.get(container);
+            if (root) root.render(<Tree app={app} ctx={vctx} />);
+            else mountInto(container, <Tree app={app} ctx={vctx} />);
+          },
           unmount(container: HTMLElement) {
             unmountContainer(container);
           },

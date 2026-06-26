@@ -18,6 +18,9 @@ export interface PluginViewContext {
 export interface PluginViewProvider {
   mount(container: HTMLElement, ctx: PluginViewContext): void;
   unmount?(container: HTMLElement): void;
+  // Called instead of a remount when only the followed pane changed, so the same instance stays.
+  // Without it every tab switch rebuilds the tree and loses what the view held.
+  update?(container: HTMLElement, ctx: PluginViewContext): void;
 }
 
 export interface ParamSpec {

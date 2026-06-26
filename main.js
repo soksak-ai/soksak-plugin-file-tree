@@ -21949,7 +21949,7 @@ function detectDark() {
   }
   return true;
 }
-function LazyTree({
+var LazyTree = (0, import_react3.memo)(function LazyTree2({
   app,
   rootAbs,
   initialChildren,
@@ -22139,7 +22139,7 @@ function LazyTree({
     };
   }, []);
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(FileTree, { className: "ft", style: themeStyles, model });
-}
+});
 function Tree({ app, ctx }) {
   const { projectId, root, paneId } = ctx;
   const [lang, setLang] = (0, import_react3.useState)(() => app.locale());
@@ -22247,6 +22247,7 @@ function Tree({ app, ctx }) {
     },
     [app]
   );
+  const onFsChange = (0, import_react3.useCallback)(() => setGitNonce((n2) => n2 + 1), []);
   const followRef = (0, import_react3.useRef)(follow);
   followRef.current = follow;
   const setFollowPersist = (0, import_react3.useCallback)(
@@ -22308,7 +22309,7 @@ function Tree({ app, ctx }) {
         onOpenFile,
         theme,
         gitStatus,
-        onFsChange: () => setGitNonce((n2) => n2 + 1)
+        onFsChange
       },
       listing.root
     ) : /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "sk-files-msg", children: t3("loading", lang) }) })
@@ -22474,6 +22475,14 @@ var plugin_entry_default = {
         app.ui.registerView("tree", {
           mount(container, vctx) {
             mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx }));
+          },
+          // Only the followed pane changed, so this re-renders into the same root: React
+          // reconciles, the cwd effect runs again, and the tree data stays unless the cwd really
+          // moved. A remount rebuilt all of it — measured at about 36ms every tab switch.
+          update(container, vctx) {
+            const root = roots.get(container);
+            if (root) root.render(/* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx }));
+            else mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx }));
           },
           unmount(container) {
             unmountContainer(container);

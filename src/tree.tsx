@@ -4,6 +4,7 @@
 // toggle, kept per project in app.data.
 import {
   type CSSProperties,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -62,7 +63,10 @@ function detectDark(): boolean {
 
 // ── The lazy tree ───────────────────────────────────────────────────────────
 
-function LazyTree({
+// Memoised: a re-render caused by the followed pane changing stops here when the tree's own
+// inputs are the same, so the canvas is rebuilt only when the file data moved. Every prop has to
+// be a stable reference for that. Without it the tree was redrawn on every tab switch.
+const LazyTree = memo(function LazyTree({
   app,
   rootAbs,
   initialChildren,
@@ -292,7 +296,7 @@ function LazyTree({
   }, []);
 
   return <FileTree className="ft" style={themeStyles} model={model} />;
-}
+});
 
 // ── The view ────────────────────────────────────────────────────────────────
 
@@ -425,6 +429,9 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
     },
     [app],
   );
+  // A stable reference, or LazyTree's memo never holds: written inline this is a new function
+  // every render.
+  const onFsChange = useCallback(() => setGitNonce((n) => n + 1), []);
 
   const followRef = useRef(follow);
   followRef.current = follow;
@@ -493,7 +500,7 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
             onOpenFile={onOpenFile}
             theme={theme}
             gitStatus={gitStatus}
-            onFsChange={() => setGitNonce((n) => n + 1)}
+            onFsChange={onFsChange}
           />
         ) : (
           <div className="sk-files-msg">{translate("loading", lang)}</div>
