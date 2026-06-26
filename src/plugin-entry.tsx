@@ -52,6 +52,14 @@ export default {
           mount(container: HTMLElement, vctx: PluginViewContext) {
             mountInto(container, <Tree app={app} ctx={vctx} />);
           },
+          // 추종 pane(cwd) 만 바뀌면 같은 root 에 re-render — React 가 재조정해 cwd 추종 effect 만
+          // 다시 돌고(트리 데이터/캔버스는 cwd 가 실제로 바뀐 게 아니면 그대로), 펼친 폴더·스크롤 상태도
+          // 보존된다. remount(unmount+createRoot) 의 통째 재구축(~36ms)을 없앤다.
+          update(container: HTMLElement, vctx: PluginViewContext) {
+            const root = roots.get(container);
+            if (root) root.render(<Tree app={app} ctx={vctx} />);
+            else mountInto(container, <Tree app={app} ctx={vctx} />);
+          },
           unmount(container: HTMLElement) {
             unmountContainer(container);
           },
