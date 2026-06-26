@@ -21949,7 +21949,7 @@ function detectDark() {
   }
   return true;
 }
-function LazyTree({
+var LazyTree = (0, import_react3.memo)(function LazyTree2({
   app,
   rootAbs,
   initialChildren,
@@ -22139,7 +22139,7 @@ function LazyTree({
     };
   }, []);
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(FileTree, { className: "ft", style: themeStyles, model });
-}
+});
 function Tree({ app, ctx }) {
   const { projectId, root, paneId } = ctx;
   const [lang, setLang] = (0, import_react3.useState)(() => app.locale());
@@ -22247,6 +22247,7 @@ function Tree({ app, ctx }) {
     },
     [app]
   );
+  const onFsChange = (0, import_react3.useCallback)(() => setGitNonce((n2) => n2 + 1), []);
   const followRef = (0, import_react3.useRef)(follow);
   followRef.current = follow;
   const setFollowPersist = (0, import_react3.useCallback)(
@@ -22308,7 +22309,7 @@ function Tree({ app, ctx }) {
         onOpenFile,
         theme,
         gitStatus,
-        onFsChange: () => setGitNonce((n2) => n2 + 1)
+        onFsChange
       },
       listing.root
     ) : /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "sk-files-msg", children: t3("loading", lang) }) })
@@ -22474,6 +22475,14 @@ var plugin_entry_default = {
         app.ui.registerView("tree", {
           mount(container, vctx) {
             mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx }));
+          },
+          // 추종 pane(cwd) 만 바뀌면 같은 root 에 re-render — React 가 재조정해 cwd 추종 effect 만
+          // 다시 돌고(트리 데이터/캔버스는 cwd 가 실제로 바뀐 게 아니면 그대로), 펼친 폴더·스크롤 상태도
+          // 보존된다. remount(unmount+createRoot) 의 통째 재구축(~36ms)을 없앤다.
+          update(container, vctx) {
+            const root = roots.get(container);
+            if (root) root.render(/* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx }));
+            else mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx }));
           },
           unmount(container) {
             unmountContainer(container);

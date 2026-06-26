@@ -16,6 +16,9 @@ export interface PluginViewContext {
 export interface PluginViewProvider {
   mount(container: HTMLElement, ctx: PluginViewContext): void;
   unmount?(container: HTMLElement): void;
+  // 라이브 갱신 — 추종 pane(paneId=cwd) 만 바뀔 때 호스트가 remount 대신 호출(같은 인스턴스 재사용).
+  // 구현하면 탭 전환마다의 통째 재생성(트리 재구축·뷰 상태 유실)이 사라진다. 미구현이면 호스트가 remount.
+  update?(container: HTMLElement, ctx: PluginViewContext): void;
 }
 
 export interface ParamSpec {
