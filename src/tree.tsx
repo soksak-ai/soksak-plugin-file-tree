@@ -3,6 +3,7 @@
 // 테마는 호스트 CSS 변수(계약 A10). cwd 추종은 헤더 토글(기본 프로젝트 루트, 상태는 app.data 영속, S7/S8).
 import {
   type CSSProperties,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -61,7 +62,10 @@ function detectDark(): boolean {
 
 // ── lazy 트리 ────────────────────────────────────────────────────────────────
 
-function LazyTree({
+// memo: 부모 Tree 가 추종 pane(paneId) 변경으로 재렌더돼도, 트리 입력(rootAbs/children/theme/콜백)이
+// 그대로면 여기서 멈춘다 — 캔버스 모델/그리기는 파일 데이터가 실제 바뀔 때만. 모든 prop 은 안정 참조여야
+// 한다(아래 onFsChange 도 useCallback). 이게 탭 전환마다 트리를 다시 그리던 비용을 없앤다.
+const LazyTree = memo(function LazyTree({
   app,
   rootAbs,
   initialChildren,
@@ -289,7 +293,7 @@ function LazyTree({
   }, []);
 
   return <FileTree className="ft" style={themeStyles} model={model} />;
-}
+});
 
 // ── 사이드바 뷰 ──────────────────────────────────────────────────────────────
 
@@ -420,6 +424,8 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
     },
     [app],
   );
+  // 안정 참조 — LazyTree memo 가 깨지지 않도록(인라인이면 매 렌더 새 함수라 paneId 변경마다 재그림).
+  const onFsChange = useCallback(() => setGitNonce((n) => n + 1), []);
 
   const followRef = useRef(follow);
   followRef.current = follow;
@@ -487,7 +493,7 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
             onOpenFile={onOpenFile}
             theme={theme}
             gitStatus={gitStatus}
-            onFsChange={() => setGitNonce((n) => n + 1)}
+            onFsChange={onFsChange}
           />
         ) : (
           <div className="sk-files-msg">{translate("loading", lang)}</div>
