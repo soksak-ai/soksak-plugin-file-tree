@@ -21962,7 +21962,19 @@ var LazyTree = (0, import_react3.memo)(function LazyTree2({
     () => ({
       ...themeToTreeStyles(theme),
       "--trees-padding-inline-override": "2px",
-      "--trees-item-padding-x-override": "2px"
+      "--trees-item-padding-x-override": "2px",
+      // The tree's colours are bound to the app's own CSS variables. Through themeToTreeStyles
+      // alone the library's built-in light default leaked through — a #f8f8f8 sidebar beside a
+      // #f5f5f7 app — because its fallbacks won where the theme said nothing. These are var()
+      // references, so a theme change follows without reading or recomputing anything.
+      "--trees-bg-override": "var(--bg)",
+      "--trees-bg-muted-override": "var(--inset)",
+      "--trees-fg-override": "var(--fg)",
+      "--trees-fg-muted-override": "var(--fg2)",
+      "--trees-accent-override": "var(--acc)",
+      "--trees-border-color-override": "var(--bd)",
+      "--trees-selected-bg-override": "var(--accbg)",
+      "--trees-selected-fg-override": "var(--fg)"
     }),
     [theme]
   );
