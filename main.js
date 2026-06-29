@@ -21962,7 +21962,19 @@ var LazyTree = (0, import_react3.memo)(function LazyTree2({
     () => ({
       ...themeToTreeStyles(theme),
       "--trees-padding-inline-override": "2px",
-      "--trees-item-padding-x-override": "2px"
+      "--trees-item-padding-x-override": "2px",
+      // trees 색을 앱 테마 CSS 변수에 직접 바인딩한다. themeToTreeStyles(type/bg/fg)만으론
+      // @pierre/trees 내장 라이트 기본(sidebar-bg=#f8f8f8 + theme-token 폴백)이 새어나와
+      // 사이드바가 앱 테마(Cupertino bg #f5f5f7 등)와 다른 색으로 보였다. override 가 최고
+      // 우선이고 var() 참조라 테마 전환에 라이브로 따라간다(JS 재읽기·재계산 불요).
+      "--trees-bg-override": "var(--bg)",
+      "--trees-bg-muted-override": "var(--inset)",
+      "--trees-fg-override": "var(--fg)",
+      "--trees-fg-muted-override": "var(--fg2)",
+      "--trees-accent-override": "var(--acc)",
+      "--trees-border-color-override": "var(--bd)",
+      "--trees-selected-bg-override": "var(--accbg)",
+      "--trees-selected-fg-override": "var(--fg)"
     }),
     [theme]
   );
