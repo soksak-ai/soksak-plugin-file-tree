@@ -13,6 +13,7 @@ export function registerCommands(ctx: PluginContext): void {
       description: "Files plugin load/version check (E2E).",
       triggers: { ko: "파일 핑 적재확인 버전" },
       returns: "{ ok, version }",
+      message: (d) => `The file tree plugin ${d.version} is loaded`,
       handler: () => ({ ok: true, version: "0.0.1" }),
     }),
   );
@@ -26,6 +27,7 @@ export function registerCommands(ctx: PluginContext): void {
         path: { type: "string", description: "Absolute file path", required: true },
       },
       returns: "{ ok }",
+      message: () => "Opened the file",
       handler: async (p) => {
         const r = await app.commands!.execute("editor.open", {
           path: String(p.path ?? ""),
@@ -43,9 +45,11 @@ export function registerCommands(ctx: PluginContext): void {
         project: { type: "string", description: "Project id (default: active)" },
       },
       returns: "{ ok }",
+      message: () => "Refreshed the file tree",
       handler: (p) => {
         const tree = resolveTree(p.project as string | undefined);
-        if (!tree) return { ok: false, error: "no active file tree" };
+        if (!tree)
+          return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         tree.refresh();
         return { ok: true };
       },
@@ -62,9 +66,11 @@ export function registerCommands(ctx: PluginContext): void {
         on: { type: "boolean", description: "Explicit on/off (omit to toggle)" },
       },
       returns: "{ ok, follow }",
+      message: (d) => (d.follow ? "Following the terminal cwd" : "No longer following the terminal cwd"),
       handler: (p) => {
         const tree = resolveTree(p.project as string | undefined);
-        if (!tree) return { ok: false, error: "no active file tree" };
+        if (!tree)
+          return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         const next = typeof p.on === "boolean" ? p.on : !tree.getFollow();
         tree.setFollow(next);
         return { ok: true, follow: next };
