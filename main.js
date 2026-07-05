@@ -22392,6 +22392,7 @@ function registerCommands(ctx) {
       description: "Files plugin load/version check (E2E).",
       triggers: { ko: "\uD30C\uC77C \uD551 \uC801\uC7AC\uD655\uC778 \uBC84\uC804" },
       returns: "{ ok, version }",
+      message: (d3) => `\uD30C\uC77C \uD2B8\uB9AC \uD50C\uB7EC\uADF8\uC778 \uBC84\uC804 ${d3.version} \uC801\uC7AC\uB428`,
       handler: () => ({ ok: true, version: "0.1.0" })
     })
   );
@@ -22403,6 +22404,7 @@ function registerCommands(ctx) {
         path: { type: "string", description: "Absolute file path", required: true }
       },
       returns: "{ ok }",
+      message: () => "\uD30C\uC77C\uC744 \uC5F4\uC5C8\uC2B5\uB2C8\uB2E4.",
       handler: async (p3) => {
         const r3 = await app.commands.execute("editor.open", {
           path: String(p3.path ?? "")
@@ -22419,9 +22421,11 @@ function registerCommands(ctx) {
         project: { type: "string", description: "Project id (default: active)" }
       },
       returns: "{ ok }",
+      message: () => "\uD30C\uC77C \uD2B8\uB9AC\uB97C \uC0C8\uB85C\uACE0\uCE68\uD588\uC2B5\uB2C8\uB2E4.",
       handler: (p3) => {
         const tree = resolveTree(p3.project);
-        if (!tree) return { ok: false, error: "no active file tree" };
+        if (!tree)
+          return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         tree.refresh();
         return { ok: true };
       }
@@ -22436,9 +22440,11 @@ function registerCommands(ctx) {
         on: { type: "boolean", description: "Explicit on/off (omit to toggle)" }
       },
       returns: "{ ok, follow }",
+      message: (d3) => d3.follow ? "cwd \uCD94\uC885\uC744 \uCF30\uC2B5\uB2C8\uB2E4." : "cwd \uCD94\uC885\uC744 \uAED0\uC2B5\uB2C8\uB2E4.",
       handler: (p3) => {
         const tree = resolveTree(p3.project);
-        if (!tree) return { ok: false, error: "no active file tree" };
+        if (!tree)
+          return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         const next = typeof p3.on === "boolean" ? p3.on : !tree.getFollow();
         tree.setFollow(next);
         return { ok: true, follow: next };

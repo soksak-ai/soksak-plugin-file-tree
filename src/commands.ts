@@ -12,6 +12,7 @@ export function registerCommands(ctx: PluginContext): void {
       description: "Files plugin load/version check (E2E).",
       triggers: { ko: "파일 핑 적재확인 버전" },
       returns: "{ ok, version }",
+      message: (d) => `파일 트리 플러그인 버전 ${d.version} 적재됨`,
       handler: () => ({ ok: true, version: "0.1.0" }),
     }),
   );
@@ -25,6 +26,7 @@ export function registerCommands(ctx: PluginContext): void {
         path: { type: "string", description: "Absolute file path", required: true },
       },
       returns: "{ ok }",
+      message: () => "파일을 열었습니다.",
       handler: async (p) => {
         const r = await app.commands!.execute("editor.open", {
           path: String(p.path ?? ""),
@@ -42,9 +44,11 @@ export function registerCommands(ctx: PluginContext): void {
         project: { type: "string", description: "Project id (default: active)" },
       },
       returns: "{ ok }",
+      message: () => "파일 트리를 새로고침했습니다.",
       handler: (p) => {
         const tree = resolveTree(p.project as string | undefined);
-        if (!tree) return { ok: false, error: "no active file tree" };
+        if (!tree)
+          return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         tree.refresh();
         return { ok: true };
       },
@@ -61,9 +65,11 @@ export function registerCommands(ctx: PluginContext): void {
         on: { type: "boolean", description: "Explicit on/off (omit to toggle)" },
       },
       returns: "{ ok, follow }",
+      message: (d) => (d.follow ? "cwd 추종을 켰습니다." : "cwd 추종을 껐습니다."),
       handler: (p) => {
         const tree = resolveTree(p.project as string | undefined);
-        if (!tree) return { ok: false, error: "no active file tree" };
+        if (!tree)
+          return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         const next = typeof p.on === "boolean" ? p.on : !tree.getFollow();
         tree.setFollow(next);
         return { ok: true, follow: next };
