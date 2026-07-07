@@ -17,7 +17,13 @@ export function clearTree(projectId: string): void {
   if (trees.delete(projectId) && active === projectId) active = null;
 }
 
+// Which project a command actually acted on. With none named it resolves to the active tree, and
+// resolveTree resolves the same way — one rule, so the answer names the tree that was touched.
+export function resolveTreeKey(projectId?: string): string | undefined {
+  return projectId ?? active ?? undefined;
+}
+
 export function resolveTree(projectId?: string): TreeHandle | undefined {
-  const key = projectId ?? active ?? undefined;
+  const key = resolveTreeKey(projectId);
   return key != null ? trees.get(key) : undefined;
 }

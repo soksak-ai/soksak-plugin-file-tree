@@ -1,7 +1,7 @@
 // The files.* commands — driving the tree and opening a file. One for one with the manifest's
 // contributes.commands, and exposed to the CLI and to MCP by that declaration alone.
 import type { PluginContext } from "./host";
-import { resolveTree } from "./treeReg";
+import { resolveTree, resolveTreeKey } from "./treeReg";
 
 export function registerCommands(ctx: PluginContext): void {
   const app = ctx.app;
@@ -44,14 +44,26 @@ export function registerCommands(ctx: PluginContext): void {
       params: {
         project: { type: "string", description: "Project id (default: active)" },
       },
-      returns: "{ ok }",
+      returns: "{ ok, project, follow }",
       message: () => "Refreshed the file tree",
+      // Offered only while follow is off. With it on the tree already re-lists on every cwd
+      // change.
+      hint: (d) =>
+        d.follow === false && typeof d.project === "string"
+          ? [
+              {
+                cmd: `sok plugin.soksak-plugin-file-tree.follow '{"project":"${d.project}","on":true}'`,
+                why: "Turn follow on to refresh on every terminal cwd change",
+              },
+            ]
+          : [],
       handler: (p) => {
+        const project = resolveTreeKey(p.project as string | undefined);
         const tree = resolveTree(p.project as string | undefined);
         if (!tree)
           return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         tree.refresh();
-        return { ok: true };
+        return { ok: true, project, follow: tree.getFollow() };
       },
     }),
   );
@@ -65,15 +77,27 @@ export function registerCommands(ctx: PluginContext): void {
         project: { type: "string", description: "Project id (default: active)" },
         on: { type: "boolean", description: "Explicit on/off (omit to toggle)" },
       },
-      returns: "{ ok, follow }",
+      returns: "{ ok, follow, project }",
       message: (d) => (d.follow ? "Following the terminal cwd" : "No longer following the terminal cwd"),
+      // Offered only just after turning it on: the directory being followed can be seen at once.
+      // Turning it off has no follow-up.
+      hint: (d) =>
+        d.follow === true && typeof d.project === "string"
+          ? [
+              {
+                cmd: `sok plugin.soksak-plugin-file-tree.refresh '{"project":"${d.project}"}'`,
+                why: "Refresh now to see the directory being followed",
+              },
+            ]
+          : [],
       handler: (p) => {
+        const project = resolveTreeKey(p.project as string | undefined);
         const tree = resolveTree(p.project as string | undefined);
         if (!tree)
           return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         const next = typeof p.on === "boolean" ? p.on : !tree.getFollow();
         tree.setFollow(next);
-        return { ok: true, follow: next };
+        return { ok: true, follow: next, project };
       },
     }),
   );

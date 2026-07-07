@@ -29,12 +29,30 @@ export interface ParamSpec {
   required?: boolean;
 }
 
+// A follow-up worth knowing about — the core's CommandHint. cmd is the line, why is one sentence
+// on what it is for. A suggestion and not an instruction: whoever reads it may ignore it.
+export interface CommandHint {
+  cmd: string;
+  why: string;
+}
+
+// The caller's context — the core's CommandContext, in the part this plugin reads.
+export interface CommandContext {
+  pane?: string;
+  remote?: boolean;
+  window?: { label: string };
+  parent?: string;
+  origin?: string;
+}
+
 export interface PluginCommandSpec {
   description: string;
   triggers?: Record<string, string>;
   params?: Record<string, ParamSpec>;
   returns?: string;
   message?: (data: Record<string, unknown>) => string;
+  // Offered on success: what is worth doing next when this command worked. At most three.
+  hint?: (data: Record<string, unknown>, ctx: CommandContext) => CommandHint[];
   handler: (params: Record<string, unknown>) => Promise<object> | object;
 }
 

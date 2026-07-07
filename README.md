@@ -18,8 +18,8 @@ host through CSS variables and `theme.changed`.
 ## Commands
 
 - `file-tree.open {path}` — open a file as content (via `editor.open`)
-- `file-tree.refresh {project?}` — re-list the active tree from disk
-- `file-tree.follow {project?, on?}` — toggle/set shell-cwd follow
+- `file-tree.refresh {project?}` — re-list the active (or specified) tree from disk; returns `{ ok, project, follow }`
+- `file-tree.follow {project?, on?}` — toggle/set shell-cwd follow; returns `{ ok, follow, project }`
 - `file-tree.ping` — load/version check
 
 ## Permissions
