@@ -16,8 +16,8 @@ soksak 좌측 사이드바 파일 탐색기 트리. 코드·텍스트 파일은 
 ## 명령
 
 - `file-tree.open {path}` — 파일을 콘텐츠로 열기(`editor.open` 경유)
-- `file-tree.refresh {project?}` — 활성 트리 디스크 재나열
-- `file-tree.follow {project?, on?}` — 셸 cwd 추종 토글/설정
+- `file-tree.refresh {project?}` — 활성(또는 지정) 트리 디스크 재나열, `{ ok, project, follow }` 반환
+- `file-tree.follow {project?, on?}` — 셸 cwd 추종 토글/설정, `{ ok, follow, project }` 반환
 - `file-tree.ping` — 적재/버전 확인
 
 ## 권한

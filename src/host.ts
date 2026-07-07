@@ -27,12 +27,30 @@ export interface ParamSpec {
   required?: boolean;
 }
 
+// 후속 명령 후보(제시) — 코어 CommandHint 와 동형. cmd=제안 명령줄, why=왜 유용한지 한 줄.
+// 지시가 아니라 가능성의 제시 — 받은 쪽(사람·AI)이 무시해도, 다른 수를 둬도 된다.
+export interface CommandHint {
+  cmd: string;
+  why: string;
+}
+
+// 호출자 컨텍스트 — 코어 CommandContext 와 동형(플러그인이 쓰는 부분만).
+export interface CommandContext {
+  pane?: string;
+  remote?: boolean;
+  window?: { label: string };
+  parent?: string;
+  origin?: string;
+}
+
 export interface PluginCommandSpec {
   description: string;
   triggers?: Record<string, string>;
   params?: Record<string, ParamSpec>;
   returns?: string;
   message?: (data: Record<string, unknown>) => string;
+  // 성공 hint(제시) — 이 명령이 통했을 때 다음에 둘 만한 수를 제시한다(최대 3, 코어가 자른다).
+  hint?: (data: Record<string, unknown>, ctx: CommandContext) => CommandHint[];
   handler: (params: Record<string, unknown>) => Promise<object> | object;
 }
 

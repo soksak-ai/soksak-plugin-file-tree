@@ -1,6 +1,6 @@
 // files.* 명령 — 트리 조작/파일 열기. 매니페스트 contributes.commands 와 1:1. CLI/MCP 자동 노출.
 import type { PluginContext } from "./host";
-import { resolveTree } from "./treeReg";
+import { resolveTree, resolveTreeKey } from "./treeReg";
 
 export function registerCommands(ctx: PluginContext): void {
   const app = ctx.app;
@@ -43,14 +43,25 @@ export function registerCommands(ctx: PluginContext): void {
       params: {
         project: { type: "string", description: "Project id (default: active)" },
       },
-      returns: "{ ok }",
+      returns: "{ ok, project, follow }",
       message: () => "파일 트리를 새로고침했습니다.",
+      // follow 가 꺼져있을 때만 제시 — 켜져있으면 이미 cwd 변경마다 자동 갱신 중이라 불필요.
+      hint: (d) =>
+        d.follow === false && typeof d.project === "string"
+          ? [
+              {
+                cmd: `sok plugin.soksak-plugin-file-tree.follow '{"project":"${d.project}","on":true}'`,
+                why: "터미널 cwd 변경마다 자동으로 새로고침하려면 follow 를 켤 수 있습니다.",
+              },
+            ]
+          : [],
       handler: (p) => {
+        const project = resolveTreeKey(p.project as string | undefined);
         const tree = resolveTree(p.project as string | undefined);
         if (!tree)
           return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         tree.refresh();
-        return { ok: true };
+        return { ok: true, project, follow: tree.getFollow() };
       },
     }),
   );
@@ -64,15 +75,26 @@ export function registerCommands(ctx: PluginContext): void {
         project: { type: "string", description: "Project id (default: active)" },
         on: { type: "boolean", description: "Explicit on/off (omit to toggle)" },
       },
-      returns: "{ ok, follow }",
+      returns: "{ ok, follow, project }",
       message: (d) => (d.follow ? "cwd 추종을 켰습니다." : "cwd 추종을 껐습니다."),
+      // 켬 직후에만 제시 — 지금 바로 추종 중인 디렉토리를 확인할 수 있다. 끔은 후속이 없다.
+      hint: (d) =>
+        d.follow === true && typeof d.project === "string"
+          ? [
+              {
+                cmd: `sok plugin.soksak-plugin-file-tree.refresh '{"project":"${d.project}"}'`,
+                why: "지금 새로고침하면 추종 중인 디렉토리를 바로 확인할 수 있습니다.",
+              },
+            ]
+          : [],
       handler: (p) => {
+        const project = resolveTreeKey(p.project as string | undefined);
         const tree = resolveTree(p.project as string | undefined);
         if (!tree)
           return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         const next = typeof p.on === "boolean" ? p.on : !tree.getFollow();
         tree.setFollow(next);
-        return { ok: true, follow: next };
+        return { ok: true, follow: next, project };
       },
     }),
   );
