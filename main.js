@@ -21912,8 +21912,11 @@ function setTree(projectId, h3) {
 function clearTree(projectId) {
   if (trees.delete(projectId) && active === projectId) active = null;
 }
+function resolveTreeKey(projectId) {
+  return projectId ?? active ?? void 0;
+}
 function resolveTree(projectId) {
-  const key = projectId ?? active ?? void 0;
+  const key = resolveTreeKey(projectId);
   return key != null ? trees.get(key) : void 0;
 }
 
@@ -22420,14 +22423,22 @@ function registerCommands(ctx) {
       params: {
         project: { type: "string", description: "Project id (default: active)" }
       },
-      returns: "{ ok }",
+      returns: "{ ok, project, follow }",
       message: () => "\uD30C\uC77C \uD2B8\uB9AC\uB97C \uC0C8\uB85C\uACE0\uCE68\uD588\uC2B5\uB2C8\uB2E4.",
+      // follow 가 꺼져있을 때만 제시 — 켜져있으면 이미 cwd 변경마다 자동 갱신 중이라 불필요.
+      hint: (d3) => d3.follow === false && typeof d3.project === "string" ? [
+        {
+          cmd: `sok plugin.soksak-plugin-file-tree.follow '{"project":"${d3.project}","on":true}'`,
+          why: "\uD130\uBBF8\uB110 cwd \uBCC0\uACBD\uB9C8\uB2E4 \uC790\uB3D9\uC73C\uB85C \uC0C8\uB85C\uACE0\uCE68\uD558\uB824\uBA74 follow \uB97C \uCF24 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+        }
+      ] : [],
       handler: (p3) => {
+        const project = resolveTreeKey(p3.project);
         const tree = resolveTree(p3.project);
         if (!tree)
           return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         tree.refresh();
-        return { ok: true };
+        return { ok: true, project, follow: tree.getFollow() };
       }
     })
   );
@@ -22439,15 +22450,23 @@ function registerCommands(ctx) {
         project: { type: "string", description: "Project id (default: active)" },
         on: { type: "boolean", description: "Explicit on/off (omit to toggle)" }
       },
-      returns: "{ ok, follow }",
+      returns: "{ ok, follow, project }",
       message: (d3) => d3.follow ? "cwd \uCD94\uC885\uC744 \uCF30\uC2B5\uB2C8\uB2E4." : "cwd \uCD94\uC885\uC744 \uAED0\uC2B5\uB2C8\uB2E4.",
+      // 켬 직후에만 제시 — 지금 바로 추종 중인 디렉토리를 확인할 수 있다. 끔은 후속이 없다.
+      hint: (d3) => d3.follow === true && typeof d3.project === "string" ? [
+        {
+          cmd: `sok plugin.soksak-plugin-file-tree.refresh '{"project":"${d3.project}"}'`,
+          why: "\uC9C0\uAE08 \uC0C8\uB85C\uACE0\uCE68\uD558\uBA74 \uCD94\uC885 \uC911\uC778 \uB514\uB809\uD1A0\uB9AC\uB97C \uBC14\uB85C \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+        }
+      ] : [],
       handler: (p3) => {
+        const project = resolveTreeKey(p3.project);
         const tree = resolveTree(p3.project);
         if (!tree)
           return { ok: false, code: "NO_TARGET", message: "no active file tree" };
         const next = typeof p3.on === "boolean" ? p3.on : !tree.getFollow();
         tree.setFollow(next);
-        return { ok: true, follow: next };
+        return { ok: true, follow: next, project };
       }
     })
   );
