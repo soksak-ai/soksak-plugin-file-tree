@@ -22,6 +22,17 @@ host through CSS variables and `theme.changed`.
 - `file-tree.follow {project?, on?}` — toggle/set shell-cwd follow; returns `{ ok, follow, project }`
 - `file-tree.ping` — load/version check
 
+## UI nodes
+
+The tree header exposes one operable node for `ui.tree` / `ui.input.click`:
+
+- `follow` — the cwd-follow toggle button. Clicking it is the UI surface of the `follow`
+  command (switches between the project root and the focused terminal's working directory).
+
+File and folder rows are rendered by `@pierre/trees` inside its own shadow DOM, so they are
+not individually addressable as light-DOM nodes. Their operation is exposed headlessly
+instead: `open {path}` opens any file, and `refresh` re-lists the tree.
+
 ## Permissions
 
 `ui`, `fs:read`, `git:read`, `terminal`, `data`, `commands`

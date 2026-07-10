@@ -64,6 +64,15 @@
           "en": "Toggle cwd Follow"
         }
       }
+    ],
+    "nodes": [
+      {
+        "id": "follow",
+        "description": {
+          "en": "cwd-follow toggle button in the tree header. Click switches the tree between the project root and the focused terminal's working directory (the follow command's UI surface).",
+          "ko": "트리 헤더의 cwd 추종 토글 버튼. 클릭하면 프로젝트 루트와 포커스된 터미널 작업 디렉토리를 오간다(follow 명령의 UI 표면)."
+        }
+      }
     ]
   }
 }
