@@ -22286,14 +22286,14 @@ function Tree({ app, ctx }) {
     return () => clearTree(projectId);
   }, [projectId, setFollowPersist]);
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "sk-files", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "sk-files-header", "data-node": "header", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "sk-files-header", children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "sk-files-title", title: listing?.root, children: baseName(listing?.root) ?? "\u2026" }),
       paneId && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
         "button",
         {
           type: "button",
           className: `sk-files-btn${follow ? " on" : ""}`,
-          "data-node": "follow-btn",
+          "data-node": "follow",
           title: t3(follow ? "followOn" : "followOff", lang),
           onClick: toggleFollow,
           children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(

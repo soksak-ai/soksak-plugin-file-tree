@@ -20,6 +20,17 @@ soksak 좌측 사이드바 파일 탐색기 트리. 코드·텍스트 파일은 
 - `file-tree.follow {project?, on?}` — 셸 cwd 추종 토글/설정, `{ ok, follow, project }` 반환
 - `file-tree.ping` — 적재/버전 확인
 
+## UI 노드
+
+트리 헤더는 `ui.tree` / `ui.input.click` 용 조작 노드 하나를 노출합니다.
+
+- `follow` — cwd 추종 토글 버튼. 클릭은 `follow` 명령의 UI 표면입니다(프로젝트 루트와 포커스된
+  터미널 작업 디렉토리를 오갑니다).
+
+파일·폴더 행은 `@pierre/trees` 가 자체 shadow DOM 안에서 렌더하므로 light-DOM 노드로 개별
+주소지정할 수 없습니다. 대신 조작을 헤드리스로 노출합니다 — `open {path}` 로 파일을 열고,
+`refresh` 로 트리를 재나열합니다.
+
 ## 권한
 
 `ui`, `fs:read`, `git:read`, `terminal`, `data`, `commands`

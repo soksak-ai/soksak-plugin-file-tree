@@ -465,7 +465,7 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
 
   return (
     <div className="sk-files">
-      <div className="sk-files-header" data-node="header">
+      <div className="sk-files-header">
         <span className="sk-files-title" title={listing?.root}>
           {baseName(listing?.root) ?? "…"}
         </span>
@@ -473,7 +473,7 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
           <button
             type="button"
             className={`sk-files-btn${follow ? " on" : ""}`}
-            data-node="follow-btn"
+            data-node="follow"
             title={translate(follow ? "followOn" : "followOff", lang)}
             onClick={toggleFollow}
           >
