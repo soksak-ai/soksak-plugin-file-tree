@@ -1,5 +1,6 @@
 // 파일 탐색기 트리(좌측 사이드바) — 코어 FileTreeSidebar/LazyTree 포팅. lazy 로딩 + OS 워처 증분 reconcile.
-// 코어 invoke 대신 공개 API: app.fs.list/watch, app.git.status, app.terminal(cwd 추종), editor.open(파일 열기).
+// 코어 invoke 대신 공개 API: app.fs.list/watch, git 라이브러리 플러그인 status 커맨드(데코레이션),
+// app.terminal(cwd 추종), editor.open(파일 열기).
 // 테마는 호스트 CSS 변수(계약 A10). cwd 추종은 헤더 토글(기본 프로젝트 루트, 상태는 app.data 영속, S7/S8).
 import {
   type CSSProperties,
@@ -401,17 +402,30 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
     };
   }, [app, effectiveRoot, nonce]);
 
-  // git 데코.
+  // git 데코 — git 라이브러리 플러그인(soksak-plugin-git-core) status 커맨드로 조회한다.
+  // 표준 봉투의 data.entries(porcelain v2 {path,x,y,status,…})에서 트리가 쓰는 {path,status}만
+  // 뽑고, untracked 디렉토리의 후행 슬래시를 제거해 트리 노드 경로와 맞춘다.
   useEffect(() => {
     const r = listing?.root;
-    if (!r) {
+    const exec = app.commands?.execute;
+    if (!r || !exec) {
       setGitStatus([]);
       return;
     }
     let cancelled = false;
-    void app.git?.status?.(r)
-      .then((s) => {
-        if (!cancelled) setGitStatus((s as GitStatusEntry[]) ?? []);
+    void exec("plugin.soksak-plugin-git-core.status", { path: r })
+      .then((out) => {
+        if (cancelled) return;
+        const raw =
+          out.ok && out.data && typeof out.data === "object"
+            ? ((out.data as { entries?: { path: string; status: string }[] }).entries ?? [])
+            : [];
+        setGitStatus(
+          raw.map((e) => ({
+            path: String(e.path).replace(/\/+$/, ""),
+            status: e.status,
+          })) as GitStatusEntry[],
+        );
       })
       .catch(() => {
         if (!cancelled) setGitStatus([]);

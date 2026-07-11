@@ -22234,13 +22234,21 @@ function Tree({ app, ctx }) {
   }, [app, effectiveRoot, nonce]);
   (0, import_react3.useEffect)(() => {
     const r3 = listing?.root;
-    if (!r3) {
+    const exec = app.commands?.execute;
+    if (!r3 || !exec) {
       setGitStatus([]);
       return;
     }
     let cancelled = false;
-    void app.git?.status?.(r3).then((s3) => {
-      if (!cancelled) setGitStatus(s3 ?? []);
+    void exec("plugin.soksak-plugin-git-core.status", { path: r3 }).then((out) => {
+      if (cancelled) return;
+      const raw = out.ok && out.data && typeof out.data === "object" ? out.data.entries ?? [] : [];
+      setGitStatus(
+        raw.map((e3) => ({
+          path: String(e3.path).replace(/\/+$/, ""),
+          status: e3.status
+        }))
+      );
     }).catch(() => {
       if (!cancelled) setGitStatus([]);
     });

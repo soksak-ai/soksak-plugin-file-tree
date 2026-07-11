@@ -15,11 +15,13 @@
   "permissions": [
     "ui",
     "fs:read",
-    "git:read",
     "terminal",
     "data",
     "commands"
   ],
+  "dependencies": {
+    "soksak-plugin-git-core": "^0.1.0"
+  },
   "contributes": {
     "views": [
       {
