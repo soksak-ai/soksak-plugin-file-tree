@@ -1,5 +1,6 @@
 // The file tree that stands beside the work. Loaded lazily and reconciled from the OS watcher.
-// Declared surfaces only: app.fs.list/watch, app.git.status, app.terminal for the cwd, editor.open.
+// Declared surfaces only: app.fs.list/watch, a git plugin's status command for the decorations,
+// app.terminal for the cwd it follows, editor.open to open a file.
 // Colours come from the host's CSS variables (A10). Whether it follows the terminal is a header
 // toggle, kept per project in app.data.
 import {
@@ -406,17 +407,30 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
     };
   }, [app, effectiveRoot, nonce]);
 
-  // The git decorations.
+  // The decorations come from a git plugin's status command.
+  // Of what it answers, the tree reads {path, status} alone, and strips the trailing slash an
+  // untracked directory carries so the path matches a tree node.
   useEffect(() => {
     const r = listing?.root;
-    if (!r) {
+    const exec = app.commands?.execute;
+    if (!r || !exec) {
       setGitStatus([]);
       return;
     }
     let cancelled = false;
-    void app.git?.status?.(r)
-      .then((s) => {
-        if (!cancelled) setGitStatus((s as GitStatusEntry[]) ?? []);
+    void exec("plugin.soksak-plugin-git-core.status", { path: r })
+      .then((out) => {
+        if (cancelled) return;
+        const raw =
+          out.ok && out.data && typeof out.data === "object"
+            ? ((out.data as { entries?: { path: string; status: string }[] }).entries ?? [])
+            : [];
+        setGitStatus(
+          raw.map((e) => ({
+            path: String(e.path).replace(/\/+$/, ""),
+            status: e.status,
+          })) as GitStatusEntry[],
+        );
       })
       .catch(() => {
         if (!cancelled) setGitStatus([]);
