@@ -84,9 +84,6 @@ export interface PluginApi {
     list?: (path: string, opts?: { meta?: boolean }) => Promise<unknown>;
     watch?: (dir: string, cb: (dir: string) => void) => Disposable;
   };
-  git?: {
-    status?: (path?: string) => Promise<unknown>;
-  };
   terminal?: {
     getCwd?: (paneId: string) => string | undefined;
     onCwd?: (paneId: string, cb: (cwd: string) => void) => Disposable;
