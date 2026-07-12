@@ -19,6 +19,7 @@ import {
   type GitStatusEntry,
   type TreeThemeInput,
 } from "@pierre/trees";
+import { gitDecorations } from "./git";
 import { t as translate } from "./i18n";
 import { setTree, clearTree } from "./treeReg";
 import type { Disposable, Listing, PluginApi, PluginViewContext } from "./host";
@@ -402,9 +403,8 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
     };
   }, [app, effectiveRoot, nonce]);
 
-  // git 데코 — git 라이브러리 플러그인(soksak-plugin-git-core) status 커맨드로 조회한다.
-  // 표준 봉투의 data.entries(porcelain v2 {path,x,y,status,…})에서 트리가 쓰는 {path,status}만
-  // 뽑고, untracked 디렉토리의 후행 슬래시를 제거해 트리 노드 경로와 맞춘다.
+  // git 데코 — soksak-git-spec@1 구현체에서 온다. 그 구현체는 **계약으로 찾는다 — 이름으로 찾지
+  // 않는다**(C3 L2 계약-핀). 구현체가 없으면 데코가 비는 것뿐이다: git 없는 파일트리도 파일트리다.
   useEffect(() => {
     const r = listing?.root;
     const exec = app.commands?.execute;
@@ -413,19 +413,10 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
       return;
     }
     let cancelled = false;
-    void exec("plugin.soksak-plugin-git-core.status", { path: r })
-      .then((out) => {
+    void gitDecorations(exec, r)
+      .then((entries) => {
         if (cancelled) return;
-        const raw =
-          out.ok && out.data && typeof out.data === "object"
-            ? ((out.data as { entries?: { path: string; status: string }[] }).entries ?? [])
-            : [];
-        setGitStatus(
-          raw.map((e) => ({
-            path: String(e.path).replace(/\/+$/, ""),
-            status: e.status,
-          })) as GitStatusEntry[],
-        );
+        setGitStatus(entries as GitStatusEntry[]);
       })
       .catch(() => {
         if (!cancelled) setGitStatus([]);
