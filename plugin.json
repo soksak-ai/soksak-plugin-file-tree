@@ -19,9 +19,6 @@
     "data",
     "commands"
   ],
-  "dependencies": {
-    "soksak-plugin-git-core": "^0.1.0"
-  },
   "contributes": {
     "views": [
       {
@@ -76,5 +73,8 @@
         }
       }
     ]
-  }
+  },
+  "consumes": [
+    "soksak-git-spec@1"
+  ]
 }

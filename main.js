@@ -21884,6 +21884,25 @@ function themeToTreeStyles(theme) {
   return result;
 }
 
+// src/git.ts
+var GIT_CONTRACT = "soksak-git-spec@1";
+async function gitProvider(exec) {
+  const out = await exec("plugin.implementers", { contract: GIT_CONTRACT });
+  if (!out?.ok) return null;
+  const list = out.data?.implementers;
+  return (list ?? []).find((i3) => i3.status === "enabled")?.id ?? null;
+}
+async function gitDecorations(exec, root) {
+  const id = await gitProvider(exec);
+  if (!id) return [];
+  const out = await exec(`plugin.${id}.status`, { path: root });
+  const entries = out.ok && out.data && typeof out.data === "object" ? out.data.entries ?? [] : [];
+  return entries.map((e3) => ({
+    path: String(e3.path).replace(/\/+$/, ""),
+    status: e3.status
+  }));
+}
+
 // src/i18n.ts
 var EN = {
   loading: "Loading\u2026",
@@ -22240,15 +22259,9 @@ function Tree({ app, ctx }) {
       return;
     }
     let cancelled = false;
-    void exec("plugin.soksak-plugin-git-core.status", { path: r3 }).then((out) => {
+    void gitDecorations(exec, r3).then((entries) => {
       if (cancelled) return;
-      const raw = out.ok && out.data && typeof out.data === "object" ? out.data.entries ?? [] : [];
-      setGitStatus(
-        raw.map((e3) => ({
-          path: String(e3.path).replace(/\/+$/, ""),
-          status: e3.status
-        }))
-      );
+      setGitStatus(entries);
     }).catch(() => {
       if (!cancelled) setGitStatus([]);
     });
