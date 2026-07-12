@@ -20,6 +20,7 @@ import {
   type GitStatusEntry,
   type TreeThemeInput,
 } from "@pierre/trees";
+import { gitDecorations } from "./git";
 import { t as translate } from "./i18n";
 import { setTree, clearTree } from "./treeReg";
 import type { Disposable, Listing, PluginApi, PluginViewContext } from "./host";
@@ -407,9 +408,9 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
     };
   }, [app, effectiveRoot, nonce]);
 
-  // The decorations come from a git plugin's status command.
-  // Of what it answers, the tree reads {path, status} alone, and strips the trailing slash an
-  // untracked directory carries so the path matches a tree node.
+  // The decorations come from whichever plugin implements the git contract, found by that
+  // contract and never by name (C3 L2). With none installed they are empty: a file tree without
+  // git is still a file tree.
   useEffect(() => {
     const r = listing?.root;
     const exec = app.commands?.execute;
@@ -418,19 +419,10 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
       return;
     }
     let cancelled = false;
-    void exec("plugin.soksak-plugin-git-core.status", { path: r })
-      .then((out) => {
+    void gitDecorations(exec, r)
+      .then((entries) => {
         if (cancelled) return;
-        const raw =
-          out.ok && out.data && typeof out.data === "object"
-            ? ((out.data as { entries?: { path: string; status: string }[] }).entries ?? [])
-            : [];
-        setGitStatus(
-          raw.map((e) => ({
-            path: String(e.path).replace(/\/+$/, ""),
-            status: e.status,
-          })) as GitStatusEntry[],
-        );
+        setGitStatus(entries as GitStatusEntry[]);
       })
       .catch(() => {
         if (!cancelled) setGitStatus([]);
