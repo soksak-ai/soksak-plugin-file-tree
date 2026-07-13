@@ -403,7 +403,7 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
     };
   }, [app, effectiveRoot, nonce]);
 
-  // git 데코 — soksak-git-spec@1 구현체에서 온다. 그 구현체는 **계약으로 찾는다 — 이름으로 찾지
+  // git 데코 — soksak-spec-plugin-git 구현체에서 온다. 그 구현체는 **계약으로 찾는다 — 이름으로 찾지
   // 않는다**(C3 L2 계약-핀). 구현체가 없으면 데코가 비는 것뿐이다: git 없는 파일트리도 파일트리다.
   useEffect(() => {
     const r = listing?.root;

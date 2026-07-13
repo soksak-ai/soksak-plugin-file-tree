@@ -6,7 +6,7 @@
 // enrichment, so its absence is an empty decoration set, not a refusal. What is banned either way is
 // naming the implementer.
 
-export const GIT_CONTRACT = "soksak-git-spec@1";
+export const GIT_CONTRACT = "soksak-spec-plugin-git";
 
 export interface GitStatusEntry {
   path: string;

@@ -1,4 +1,4 @@
-// The git seam — the tree asks whoever implements soksak-git-spec@1, and finds it by contract.
+// The git seam — the tree asks whoever implements soksak-spec-plugin-git, and finds it by contract.
 //
 // The provider id handed to these tests is deliberately not the one that ships: if an implementer's
 // name were written anywhere in this plugin, they could not pass.
