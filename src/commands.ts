@@ -2,6 +2,9 @@
 import type { PluginContext } from "./host";
 import { resolveTree, resolveTreeKey } from "./treeReg";
 
+// build.mjs 가 plugin.json.version 을 주입(버전 단일진실 — 하드코딩 드리프트 금지).
+declare const __PLUGIN_VERSION__: string;
+
 export function registerCommands(ctx: PluginContext): void {
   const app = ctx.app;
   if (!app.commands) return;
@@ -13,7 +16,7 @@ export function registerCommands(ctx: PluginContext): void {
       triggers: { ko: "파일 핑 적재확인 버전" },
       returns: "{ ok, version }",
       message: (d) => `파일 트리 플러그인 버전 ${d.version} 적재됨`,
-      handler: () => ({ ok: true, version: "0.0.1" }),
+      handler: () => ({ ok: true, version: __PLUGIN_VERSION__ }),
     }),
   );
 
