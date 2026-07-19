@@ -22417,7 +22417,7 @@ function registerCommands(ctx) {
       triggers: { ko: "\uD30C\uC77C \uD551 \uC801\uC7AC\uD655\uC778 \uBC84\uC804" },
       returns: "{ ok, version }",
       message: (d3) => `\uD30C\uC77C \uD2B8\uB9AC \uD50C\uB7EC\uADF8\uC778 \uBC84\uC804 ${d3.version} \uC801\uC7AC\uB428`,
-      handler: () => ({ ok: true, version: "0.0.1" })
+      handler: () => ({ ok: true, version: "0.0.2" })
     })
   );
   sub(

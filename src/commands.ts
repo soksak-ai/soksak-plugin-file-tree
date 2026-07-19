@@ -3,6 +3,10 @@
 import type { PluginContext } from "./host";
 import { resolveTree, resolveTreeKey } from "./treeReg";
 
+// build.mjs injects plugin.json's version. One source for it — a hardcoded copy drifts the day
+// the manifest is bumped.
+declare const __PLUGIN_VERSION__: string;
+
 export function registerCommands(ctx: PluginContext): void {
   const app = ctx.app;
   if (!app.commands) return;
@@ -14,7 +18,7 @@ export function registerCommands(ctx: PluginContext): void {
       triggers: { ko: "파일 핑 적재확인 버전" },
       returns: "{ ok, version }",
       message: (d) => `The file tree plugin ${d.version} is loaded`,
-      handler: () => ({ ok: true, version: "0.0.1" }),
+      handler: () => ({ ok: true, version: __PLUGIN_VERSION__ }),
     }),
   );
 
