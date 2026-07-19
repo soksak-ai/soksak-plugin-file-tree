@@ -2,10 +2,13 @@
 // React and @pierre/trees are inlined. The CSS is a source string injected once.
 import { build, context } from "esbuild";
 import path from "node:path";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.resolve(root, "src");
+// plugin.json is the one source for the version, injected as __PLUGIN_VERSION__.
+const manifest = JSON.parse(readFileSync(path.resolve(root, "plugin.json"), "utf8"));
 
 const opts = {
   entryPoints: ["src/plugin-entry.tsx"],
@@ -18,6 +21,7 @@ const opts = {
   define: {
     "process.env.NODE_ENV": '"production"',
     "import.meta.env.DEV": "false",
+    __PLUGIN_VERSION__: JSON.stringify(manifest.version),
   },
   outfile: "main.js",
   minify: false,

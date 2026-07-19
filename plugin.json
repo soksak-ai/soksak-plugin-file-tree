@@ -5,7 +5,7 @@
     "ko": "\ud30c\uc77c \ud2b8\ub9ac",
     "en": "File Tree"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": {
     "ko": "\uc88c\uce21 \uc0ac\uc774\ub4dc\ubc14 \ud30c\uc77c \ud0d0\uc0c9\uae30 \ud2b8\ub9ac. \uc178 cwd \ucd94\uc885 \ud1a0\uae00, git \ub370\ucf54\ub808\uc774\uc158. \ud30c\uc77c \uc5f4\uae30\ub294 \ucf54\uc5b4 editor.open \uc73c\ub85c \uc704\uc784(\uc5d0\ub514\ud130/\ubbf8\ub514\uc5b4 \ubdf0\uc5b4\uac00 \ub80c\ub354).",
     "en": "Left sidebar file explorer tree. Shell-cwd follow toggle and git decorations. Opening a file is delegated to the core editor.open command (editor / media viewers render it)."
