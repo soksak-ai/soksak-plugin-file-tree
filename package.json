@@ -1,7 +1,7 @@
 {
   "name": "soksak-plugin-file-tree",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "soksak file-tree plugin \u2014 left sidebar file explorer tree",
   "scripts": {
