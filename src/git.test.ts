@@ -26,7 +26,7 @@ describe("the git provider", () => {
   it("is resolved by contract id, and never named", async () => {
     const { exec, calls } = host({ entries: [{ path: "src/a.ts", status: "modified" }] });
     await gitDecorations(exec, "/repo");
-    expect(calls[0]).toEqual({ name: "plugin.implementers", params: { contract: GIT_CONTRACT } });
+    expect(calls[0]).toEqual({ name: "plugin.implementers", params: { id: GIT_CONTRACT } });
     expect(calls[1].name).toBe(`plugin.${PROVIDER}.status`);
     for (const c of calls) expect(c.name).not.toContain("git-core");
   });

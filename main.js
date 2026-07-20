@@ -21887,7 +21887,7 @@ function themeToTreeStyles(theme) {
 // src/git.ts
 var GIT_CONTRACT = "soksak-spec-plugin-git";
 async function gitProvider(exec) {
-  const out = await exec("plugin.implementers", { contract: GIT_CONTRACT });
+  const out = await exec("plugin.implementers", { id: GIT_CONTRACT });
   if (!out?.ok) return null;
   const list = out.data?.implementers;
   return (list ?? []).find((i3) => i3.status === "enabled")?.id ?? null;
