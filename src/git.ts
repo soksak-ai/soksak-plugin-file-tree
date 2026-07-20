@@ -19,7 +19,7 @@ type Exec = (name: string, params?: Record<string, unknown>) => Promise<Envelope
 // The enabled implementer of the contract, or null. Resolved per call: an implementer is enabled and
 // disabled at runtime, so a cached id is a claim about a fact that may already have changed.
 export async function gitProvider(exec: Exec): Promise<string | null> {
-  const out = await exec("plugin.implementers", { contract: GIT_CONTRACT });
+  const out = await exec("plugin.implementers", { id: GIT_CONTRACT });
   if (!out?.ok) return null;
   const list = (out.data as { implementers?: { id: string; status: string }[] } | undefined)
     ?.implementers;
