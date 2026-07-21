@@ -28,9 +28,9 @@
         },
         "icon": "\ud83d\udcc1",
         "placements": [
-          "sidebar-left"
+          "rail"
         ],
-        "defaultPlacement": "sidebar-left"
+        "defaultPlacement": "rail"
       }
     ],
     "commands": [
@@ -73,6 +73,12 @@
       }
     ]
   },
+  "implements": [
+    {
+      "id": "soksak-spec-plugin-sidebar-file-tree",
+      "version": "0.0.1"
+    }
+  ],
   "consumes": [
     {
       "id": "soksak-spec-plugin-git",
