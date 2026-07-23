@@ -13,9 +13,10 @@ export const GLOBAL_CSS = `
 }
 .sk-files-header {
   flex: none;
-  /* The second band — the same height as the content view-tab band. The host injects the
-     variable, so both sides of the grid line up at the same Y. */
-  height: var(--header-h, 33px);
+  /* The shared second row (core PLUGIN-CONTRACT §Toolbar row). --toolbar-h is the one source for
+     its height: the rail and the panels have to read the same token for the horizontal grid to
+     line up — measured, a header-row token here sat 5px off the panel toolbar at 28. */
+  height: var(--toolbar-h, 28px);
   box-sizing: border-box;
   display: flex;
   align-items: center;
