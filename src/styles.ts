@@ -12,9 +12,10 @@ export const GLOBAL_CSS = `
 }
 .sk-files-header {
   flex: none;
-  /* row2 밴드 — 코어 콘텐츠 뷰탭 밴드(--header-h=33)와 동일 높이. 호스트가 좌측 그리드에
-     주입하는 변수를 상속해 좌우 그리드 행이 같은 Y 에서 맞는다. */
-  height: var(--header-h, 33px);
+  /* 2행 공동 그리드(코어 PLUGIN-CONTRACT §Toolbar row) — 2행 높이의 단일 진실은
+     --toolbar-h 다. 레일·패널이 공동사용해야 수평 그리드가 이어진다(과거 헤더행 토큰 소비는
+     패널 툴바(28)와 5px 어긋나던 실측 결함). */
+  height: var(--toolbar-h, 28px);
   box-sizing: border-box;
   display: flex;
   align-items: center;
