@@ -1,5 +1,5 @@
 // This plugin's entry — one ESM the loader imports through a blob URL, bundled by esbuild.
-// It owns a file tree that stands beside the work (registerView "tree"). Opening a file is
+// It owns a file tree that stands beside the work (registerView "tree") and nothing else. Opening
 // a file is delegated to whichever plugin draws that kind of file.
 import { createRoot, type Root } from "react-dom/client";
 import { Tree } from "./tree";

@@ -1,6 +1,6 @@
 // The file tree that stands beside the work. Loaded lazily and reconciled from the OS watcher.
 // Declared surfaces only: app.fs.list/watch, a git plugin's status command for the decorations,
-// app.terminal for the cwd it follows, editor.open to open a file.
+// app.terminal for the cwd it follows, ui.intent.open to open a file.
 // Colours come from the host's CSS variables (A10). Whether it follows the terminal is a header
 // toggle, kept per project in app.data.
 import {
@@ -443,7 +443,7 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
 
   const onOpenFile = useCallback(
     (absPath: string) => {
-      void app.commands?.execute("editor.open", { path: absPath });
+      void app.commands?.execute("ui.intent.open", { path: absPath });
     },
     [app],
   );

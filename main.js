@@ -22279,7 +22279,7 @@ function Tree({ app, ctx }) {
   );
   const onOpenFile = (0, import_react3.useCallback)(
     (absPath) => {
-      void app.commands?.execute("editor.open", { path: absPath });
+      void app.commands?.execute("ui.intent.open", { path: absPath });
     },
     [app]
   );
@@ -22423,7 +22423,7 @@ function registerCommands(ctx) {
   );
   sub(
     app.commands.register("open", {
-      description: "Open a file as content. Routes through the core editor.open command to the registered viewer.",
+      description: "Open a file as content. Routes through the core ui.intent.open command to the registered viewer.",
       triggers: { ko: "\uD30C\uC77C \uC5F4\uAE30 \uBCF4\uAE30" },
       params: {
         path: { type: "string", description: "Absolute file path", required: true }
@@ -22431,7 +22431,7 @@ function registerCommands(ctx) {
       returns: "{ ok }",
       message: () => "\uD30C\uC77C\uC744 \uC5F4\uC5C8\uC2B5\uB2C8\uB2E4.",
       handler: async (p3) => {
-        const r3 = await app.commands.execute("editor.open", {
+        const r3 = await app.commands.execute("ui.intent.open", {
           path: String(p3.path ?? "")
         });
         return { ...r3 };

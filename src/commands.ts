@@ -25,7 +25,7 @@ export function registerCommands(ctx: PluginContext): void {
   sub(
     app.commands.register("open", {
       description:
-        "Open a file as content. Routes through the core editor.open command to the registered viewer.",
+        "Open a file as content. Routes through the core ui.intent.open command to the registered viewer.",
       triggers: { ko: "파일 열기 보기" },
       params: {
         path: { type: "string", description: "Absolute file path", required: true },
@@ -33,7 +33,7 @@ export function registerCommands(ctx: PluginContext): void {
       returns: "{ ok }",
       message: () => "Opened the file",
       handler: async (p) => {
-        const r = await app.commands!.execute("editor.open", {
+        const r = await app.commands!.execute("ui.intent.open", {
           path: String(p.path ?? ""),
         });
         return { ...r };
