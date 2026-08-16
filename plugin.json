@@ -28,7 +28,8 @@
         },
         "icon": "📁",
         "placements": [
-          "left"
+          "left",
+          "right"
         ],
         "defaultPlacement": "left"
       }
