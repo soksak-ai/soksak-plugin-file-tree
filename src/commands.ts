@@ -7,6 +7,12 @@ import { resolveTree, resolveTreeKey } from "./treeReg";
 // the manifest is bumped.
 declare const __PLUGIN_VERSION__: string;
 
+/** The viewer this plugin was given, read from its own manifest. null = none was declared. */
+function declaredViewer(manifest: unknown): string | null {
+  const deps = (manifest as { dependencies?: Record<string, string> } | null)?.dependencies;
+  return Object.keys(deps ?? {})[0] ?? null;
+}
+
 export function registerCommands(ctx: PluginContext): void {
   const app = ctx.app;
   if (!app.commands) return;
@@ -25,18 +31,29 @@ export function registerCommands(ctx: PluginContext): void {
   sub(
     app.commands.register("open", {
       description:
-        "Open a file as content. Routes through the core ui.intent.open command to the registered viewer.",
+        "Open a file as content, through the viewer plugin this one declares as a dependency.",
       triggers: { ko: "파일 열기 보기" },
       params: {
         path: { type: "string", description: "Absolute file path", required: true },
       },
       returns: "{ ok }",
       message: () => "Opened the file",
+      // The host held a `ui.intent.open` that opened a path as a file tab. That tab kind is gone —
+      // a file reaches the screen as a plugin view like anything else — so opening one is the work
+      // of whichever plugin draws files. This names that plugin through `dependencies`, and refuses
+      // by name when none is declared rather than answering as though a file had opened.
       handler: async (p) => {
-        const r = await app.commands!.execute("ui.intent.open", {
+        const viewer = declaredViewer(ctx.manifest);
+        if (!viewer) {
+          return {
+            ok: false,
+            code: "TARGET_NOT_FOUND",
+            message: "no plugin is declared to open a file — add a viewer to dependencies",
+          };
+        }
+        return await app.commands!.execute(`plugin.${viewer}.open`, {
           path: String(p.path ?? ""),
         });
-        return { ...r };
       },
     }),
   );

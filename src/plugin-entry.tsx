@@ -2,6 +2,7 @@
 // It owns a file tree that stands beside the work (registerView "tree") and nothing else. Opening
 // a file is delegated to whichever plugin draws that kind of file.
 import { createRoot, type Root } from "react-dom/client";
+import { gitProvider } from "./git";
 import { Tree } from "./tree";
 import { GLOBAL_CSS } from "./styles";
 import { registerCommands } from "./commands";
@@ -44,21 +45,23 @@ function unmountContainer(container: HTMLElement): void {
 export default {
   activate(ctx: PluginContext) {
     const app = ctx.app;
+    // The git plugin this one declared, read once here because this is where the manifest is.
+    const gitPlugin = gitProvider(ctx.manifest);
     ensureStyle();
 
     if (app.ui?.registerView) {
       ctx.subscriptions.push(
         app.ui.registerView("tree", {
           mount(container: HTMLElement, vctx: PluginViewContext) {
-            mountInto(container, <Tree app={app} ctx={vctx} />);
+            mountInto(container, <Tree app={app} ctx={vctx} gitPlugin={gitPlugin} />);
           },
           // Only the followed pane changed, so this re-renders into the same root: React
           // reconciles, the cwd effect runs again, and the tree data stays unless the cwd really
           // moved. A remount rebuilt all of it — measured at about 36ms every tab switch.
           update(container: HTMLElement, vctx: PluginViewContext) {
             const root = roots.get(container);
-            if (root) root.render(<Tree app={app} ctx={vctx} />);
-            else mountInto(container, <Tree app={app} ctx={vctx} />);
+            if (root) root.render(<Tree app={app} ctx={vctx} gitPlugin={gitPlugin} />);
+            else mountInto(container, <Tree app={app} ctx={vctx} gitPlugin={gitPlugin} />);
           },
           unmount(container: HTMLElement) {
             unmountContainer(container);

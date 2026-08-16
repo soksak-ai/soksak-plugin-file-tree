@@ -314,7 +314,17 @@ const LazyTree = memo(function LazyTree({
 
 // ── The view ────────────────────────────────────────────────────────────────
 
-export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
+export function Tree({
+  app,
+  ctx,
+  gitPlugin,
+}: {
+  app: PluginApi;
+  ctx: PluginViewContext;
+  /** The git plugin this one declared, read once where the manifest is. null = none declared, and
+   *  then the tree draws without decorations. */
+  gitPlugin: string | null;
+}) {
   const { projectId, root, paneId } = ctx;
   const [lang, setLang] = useState(() => app.locale());
   const [isDark, setIsDark] = useState(detectDark);
@@ -419,7 +429,7 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
       return;
     }
     let cancelled = false;
-    void gitDecorations(exec, r)
+    void gitDecorations(exec, gitPlugin, r)
       .then((entries) => {
         if (cancelled) return;
         setGitStatus(entries as GitStatusEntry[]);
@@ -441,9 +451,12 @@ export function Tree({ app, ctx }: { app: PluginApi; ctx: PluginViewContext }) {
     [isDark],
   );
 
+  // Opening goes through this plugin's own `open` command, which is the one place that knows which
+  // viewer was declared. The host had a `ui.intent.open` until 2026-08-16; a file is drawn by a
+  // plugin view now, so opening one is the work of whichever plugin draws files.
   const onOpenFile = useCallback(
     (absPath: string) => {
-      void app.commands?.execute("ui.intent.open", { path: absPath });
+      void app.commands?.execute("plugin.soksak-plugin-file-tree.open", { path: absPath });
     },
     [app],
   );

@@ -1,12 +1,12 @@
-// git decorations come from the contract, and the plugin that implements it is found by contract,
-// never by name (C3 L2 contract-pin). The tree does not run git and does not know who does.
+// git decorations come from the plugin this one declares as a dependency. The tree does not run git.
 //
-// No implementer is not an error here: a file tree without git decorations is still a file tree.
-// That is the difference between this consumer and, say, a review plugin — the decoration is an
-// enrichment, so its absence is an empty decoration set, not a refusal. What is banned either way is
-// naming the implementer.
-
-export const GIT_CONTRACT = "soksak-spec-plugin-git";
+// It asked "who implements soksak-spec-plugin-git" until 2026-08-16. A plugin holds its own spec now
+// and whoever needs a thing names the plugin (soksak-core C3, C3a): a shared spec over several git
+// implementations would force a rule onto the parts that differ, and it charged every plugin for a
+// convenience most of them never used.
+//
+// No git plugin is not an error: a file tree without decorations is still a file tree. The
+// decoration is an enrichment, so its absence is an empty set, not a refusal.
 
 export interface GitStatusEntry {
   path: string;
@@ -16,21 +16,22 @@ export interface GitStatusEntry {
 type Envelope = { ok: boolean; data?: unknown };
 type Exec = (name: string, params?: Record<string, unknown>) => Promise<Envelope>;
 
-// The enabled implementer of the contract, or null. Resolved per call: an implementer is enabled and
-// disabled at runtime, so a cached id is a claim about a fact that may already have changed.
-export async function gitProvider(exec: Exec): Promise<string | null> {
-  const out = await exec("plugin.implementers", { id: GIT_CONTRACT });
-  if (!out?.ok) return null;
-  const list = (out.data as { implementers?: { id: string; status: string }[] } | undefined)
-    ?.implementers;
-  return (list ?? []).find((i) => i.status === "enabled")?.id ?? null;
+// The git plugin this one declared, read from its own manifest. Read where the manifest is — at
+// activation — and handed down, so nothing else needs the manifest to draw a tree.
+export function gitProvider(manifest: unknown): string | null {
+  const deps = (manifest as { dependencies?: Record<string, string> } | null)?.dependencies ?? {};
+  return Object.keys(deps).find((id) => id.includes("git")) ?? null;
 }
 
 // The decorations for a repository root. The contract's status answers porcelain-v2 entries; the
 // tree needs only {path, status}, and an untracked directory's trailing slash is dropped so the path
 // matches a tree node.
-export async function gitDecorations(exec: Exec, root: string): Promise<GitStatusEntry[]> {
-  const id = await gitProvider(exec);
+export async function gitDecorations(
+  exec: Exec,
+  gitPlugin: string | null,
+  root: string,
+): Promise<GitStatusEntry[]> {
+  const id = gitPlugin;
   if (!id) return [];
   const out = await exec(`plugin.${id}.status`, { path: root });
   const entries =

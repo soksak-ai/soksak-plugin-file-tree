@@ -12753,6 +12753,22 @@ var require_jsx_runtime = __commonJS({
 // src/plugin-entry.tsx
 var import_client = __toESM(require_client(), 1);
 
+// src/git.ts
+function gitProvider(manifest) {
+  const deps = manifest?.dependencies ?? {};
+  return Object.keys(deps).find((id) => id.includes("git")) ?? null;
+}
+async function gitDecorations(exec, gitPlugin, root) {
+  const id = gitPlugin;
+  if (!id) return [];
+  const out = await exec(`plugin.${id}.status`, { path: root });
+  const entries = out.ok && out.data && typeof out.data === "object" ? out.data.entries ?? [] : [];
+  return entries.map((e3) => ({
+    path: String(e3.path).replace(/\/+$/, ""),
+    status: e3.status
+  }));
+}
+
 // src/tree.tsx
 var import_react3 = __toESM(require_react(), 1);
 
@@ -21884,25 +21900,6 @@ function themeToTreeStyles(theme) {
   return result;
 }
 
-// src/git.ts
-var GIT_CONTRACT = "soksak-spec-plugin-git";
-async function gitProvider(exec) {
-  const out = await exec("plugin.implementers", { id: GIT_CONTRACT });
-  if (!out?.ok) return null;
-  const list = out.data?.implementers;
-  return (list ?? []).find((i3) => i3.status === "enabled")?.id ?? null;
-}
-async function gitDecorations(exec, root) {
-  const id = await gitProvider(exec);
-  if (!id) return [];
-  const out = await exec(`plugin.${id}.status`, { path: root });
-  const entries = out.ok && out.data && typeof out.data === "object" ? out.data.entries ?? [] : [];
-  return entries.map((e3) => ({
-    path: String(e3.path).replace(/\/+$/, ""),
-    status: e3.status
-  }));
-}
-
 // src/i18n.ts
 var EN = {
   loading: "Loading\u2026",
@@ -22174,7 +22171,11 @@ var LazyTree = (0, import_react3.memo)(function LazyTree2({
   }, []);
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(FileTree, { className: "ft", style: themeStyles, model });
 });
-function Tree({ app, ctx }) {
+function Tree({
+  app,
+  ctx,
+  gitPlugin
+}) {
   const { projectId, root, paneId } = ctx;
   const [lang, setLang] = (0, import_react3.useState)(() => app.locale());
   const [isDark, setIsDark] = (0, import_react3.useState)(detectDark);
@@ -22259,7 +22260,7 @@ function Tree({ app, ctx }) {
       return;
     }
     let cancelled = false;
-    void gitDecorations(exec, r3).then((entries) => {
+    void gitDecorations(exec, gitPlugin, r3).then((entries) => {
       if (cancelled) return;
       setGitStatus(entries);
     }).catch(() => {
@@ -22279,7 +22280,7 @@ function Tree({ app, ctx }) {
   );
   const onOpenFile = (0, import_react3.useCallback)(
     (absPath) => {
-      void app.commands?.execute("ui.intent.open", { path: absPath });
+      void app.commands?.execute("plugin.soksak-plugin-file-tree.open", { path: absPath });
     },
     [app]
   );
@@ -22408,6 +22409,10 @@ var GLOBAL_CSS = `
 `;
 
 // src/commands.ts
+function declaredViewer(manifest) {
+  const deps = manifest?.dependencies;
+  return Object.keys(deps ?? {})[0] ?? null;
+}
 function registerCommands(ctx) {
   const app = ctx.app;
   if (!app.commands) return;
@@ -22418,23 +22423,34 @@ function registerCommands(ctx) {
       triggers: { ko: "\uD30C\uC77C \uD551 \uC801\uC7AC\uD655\uC778 \uBC84\uC804" },
       returns: "{ ok, version }",
       message: (d3) => `\uD30C\uC77C \uD2B8\uB9AC \uD50C\uB7EC\uADF8\uC778 \uBC84\uC804 ${d3.version} \uC801\uC7AC\uB428`,
-      handler: () => ({ ok: true, version: "0.0.2" })
+      handler: () => ({ ok: true, version: "0.0.1" })
     })
   );
   sub(
     app.commands.register("open", {
-      description: "Open a file as content. Routes through the core ui.intent.open command to the registered viewer.",
+      description: "Open a file as content, through the viewer plugin this one declares as a dependency.",
       triggers: { ko: "\uD30C\uC77C \uC5F4\uAE30 \uBCF4\uAE30" },
       params: {
         path: { type: "string", description: "Absolute file path", required: true }
       },
       returns: "{ ok }",
       message: () => "\uD30C\uC77C\uC744 \uC5F4\uC5C8\uC2B5\uB2C8\uB2E4.",
+      // The host held a `ui.intent.open` that opened a path as a file tab. That tab kind is gone —
+      // a file reaches the screen as a plugin view like anything else — so opening one is the work
+      // of whichever plugin draws files. This names that plugin through `dependencies`, and refuses
+      // by name when none is declared rather than answering as though a file had opened.
       handler: async (p3) => {
-        const r3 = await app.commands.execute("ui.intent.open", {
+        const viewer = declaredViewer(ctx.manifest);
+        if (!viewer) {
+          return {
+            ok: false,
+            code: "TARGET_NOT_FOUND",
+            message: "\uD30C\uC77C\uC744 \uC5EC\uB294 \uD50C\uB7EC\uADF8\uC778\uC774 \uC120\uC5B8\uB418\uC5B4 \uC788\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4 \u2014 dependencies \uC5D0 \uBDF0\uC5B4\uB97C \uCD94\uAC00\uD558\uC2ED\uC2DC\uC624"
+          };
+        }
+        return await app.commands.execute(`plugin.${viewer}.open`, {
           path: String(p3.path ?? "")
         });
-        return { ...r3 };
       }
     })
   );
@@ -22530,20 +22546,21 @@ function unmountContainer(container) {
 var plugin_entry_default = {
   activate(ctx) {
     const app = ctx.app;
+    const gitPlugin = gitProvider(ctx.manifest);
     ensureStyle();
     if (app.ui?.registerView) {
       ctx.subscriptions.push(
         app.ui.registerView("tree", {
           mount(container, vctx) {
-            mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx }));
+            mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx, gitPlugin }));
           },
           // Only the followed pane changed, so this re-renders into the same root: React
           // reconciles, the cwd effect runs again, and the tree data stays unless the cwd really
           // moved. A remount rebuilt all of it — measured at about 36ms every tab switch.
           update(container, vctx) {
             const root = roots.get(container);
-            if (root) root.render(/* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx }));
-            else mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx }));
+            if (root) root.render(/* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx, gitPlugin }));
+            else mountInto(container, /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx, gitPlugin }));
           },
           unmount(container) {
             unmountContainer(container);

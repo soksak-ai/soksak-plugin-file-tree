@@ -3,19 +3,16 @@
 // The provider id handed to these tests is deliberately not the one that ships: if an implementer's
 // name were written anywhere in this plugin, they could not pass.
 import { describe, expect, it } from "vitest";
-import { GIT_CONTRACT, gitDecorations, gitProvider } from "./git";
+import { gitDecorations, gitProvider } from "./git";
 
 const PROVIDER = "soksak-plugin-any-git";
-const ENABLED = [{ id: PROVIDER, version: "1.0.0", status: "enabled" }];
 
 function host({
-  implementers = ENABLED,
   entries = [] as { path: string; status: string }[],
   calls = [] as { name: string; params?: Record<string, unknown> }[],
 } = {}) {
   const exec = async (name: string, params?: Record<string, unknown>) => {
     calls.push({ name, params });
-    if (name === "plugin.implementers") return { ok: true, data: { implementers } };
     if (name === `plugin.${PROVIDER}.status`) return { ok: true, data: { entries } };
     return { ok: true, data: {} };
   };
@@ -23,22 +20,20 @@ function host({
 }
 
 describe("the git provider", () => {
-  it("is resolved by contract id, and never named", async () => {
+  it("is the plugin this one declared, and nothing else is called", async () => {
     const { exec, calls } = host({ entries: [{ path: "src/a.ts", status: "modified" }] });
-    await gitDecorations(exec, "/repo");
-    expect(calls[0]).toEqual({ name: "plugin.implementers", params: { id: GIT_CONTRACT } });
-    expect(calls[1].name).toBe(`plugin.${PROVIDER}.status`);
-    for (const c of calls) expect(c.name).not.toContain("git-core");
+    await gitDecorations(exec, PROVIDER, "/repo");
+    expect(calls).toHaveLength(1);
+    expect(calls[0].name).toBe(`plugin.${PROVIDER}.status`);
   });
 
-  it("is null when nothing enabled implements the contract", async () => {
-    const { exec } = host({ implementers: [] });
-    expect(await gitProvider(exec)).toBeNull();
+  it("is null when the manifest declares no git plugin", () => {
+    expect(gitProvider({ dependencies: {} })).toBeNull();
+    expect(gitProvider(null)).toBeNull();
   });
 
-  it("a disabled implementer is not a provider", async () => {
-    const { exec } = host({ implementers: [{ id: PROVIDER, version: "1", status: "disabled" }] });
-    expect(await gitProvider(exec)).toBeNull();
+  it("is the declared id when there is one", () => {
+    expect(gitProvider({ dependencies: { [PROVIDER]: "0.0.1" } })).toBe(PROVIDER);
   });
 });
 
@@ -50,17 +45,17 @@ describe("decorations", () => {
         { path: "docs/", status: "untracked" },
       ],
     });
-    expect(await gitDecorations(exec, "/repo")).toEqual([
+    expect(await gitDecorations(exec, PROVIDER, "/repo")).toEqual([
       { path: "src/a.ts", status: "modified" },
       { path: "docs", status: "untracked" },
     ]);
   });
 
-  it("no provider → no decorations, and the tree still works", async () => {
+  it("no declared plugin → no decorations, and the tree still works", async () => {
     // A file tree without git is still a file tree. The decoration is an enrichment, so its absence
-    // is an empty set — not a refusal, and never an implementer named "just in case".
-    const { exec, calls } = host({ implementers: [] });
-    expect(await gitDecorations(exec, "/repo")).toEqual([]);
-    expect(calls.filter((c) => c.name.startsWith(`plugin.${PROVIDER}`))).toHaveLength(0);
+    // is an empty set — not a refusal, and never a plugin called "just in case".
+    const { exec, calls } = host({});
+    expect(await gitDecorations(exec, null, "/repo")).toEqual([]);
+    expect(calls).toHaveLength(0);
   });
 });
