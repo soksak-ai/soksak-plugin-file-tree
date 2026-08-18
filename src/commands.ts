@@ -1,10 +1,11 @@
 // The files.* commands — driving the tree and opening a file. One for one with the manifest's
 // contributes.commands, and exposed to the CLI and to MCP by that declaration alone.
 import type { PluginContext } from "./host";
+import { sentence } from "./i18n";
 import { resolveTree, resolveTreeKey } from "./treeReg";
 
-// build.mjs injects plugin.json's version. One source for it — a hardcoded copy drifts the day
-// the manifest is bumped.
+// build.mjs injects plugin.json's version. One source for it — a hardcoded copy drifts the day the
+// manifest is bumped and nothing says which of the two is the version.
 declare const __PLUGIN_VERSION__: string;
 
 /** The viewer this plugin was given, read from its own manifest. null = none was declared. */
@@ -20,24 +21,34 @@ export function registerCommands(ctx: PluginContext): void {
 
   sub(
     app.commands.register("ping", {
-      description: "Files plugin load/version check (E2E).",
+      description: sentence("cmd.ping.desc"),
       triggers: { ko: "파일 핑 적재확인 버전" },
       returns: "{ ok, version }",
-      message: (d) => `The file tree plugin ${d.version} is loaded`,
+      message: (d) => {
+        const said = sentence("cmd.ping.answer");
+        const version = String(d.version ?? "");
+        return {
+          en: said.en.replace("{version}", version),
+          ko: said.ko.replace("{version}", version),
+        };
+      },
       handler: () => ({ ok: true, version: __PLUGIN_VERSION__ }),
     }),
   );
 
   sub(
     app.commands.register("open", {
-      description:
-        "Open a file as content, through the viewer plugin this one declares as a dependency.",
+      description: sentence("cmd.open.desc"),
       triggers: { ko: "파일 열기 보기" },
       params: {
-        path: { type: "string", description: "Absolute file path", required: true },
+        path: {
+          type: "string",
+          description: { en: "Absolute file path", ko: "절대 파일 경로" },
+          required: true,
+        },
       },
       returns: "{ ok }",
-      message: () => "Opened the file",
+      message: () => sentence("cmd.open.answer"),
       // The host held a `ui.intent.open` that opened a path as a file tab. That tab kind is gone —
       // a file reaches the screen as a plugin view like anything else — so opening one is the work
       // of whichever plugin draws files. This names that plugin through `dependencies`, and refuses
@@ -48,7 +59,7 @@ export function registerCommands(ctx: PluginContext): void {
           return {
             ok: false,
             code: "TARGET_NOT_FOUND",
-            message: "no plugin is declared to open a file — add a viewer to dependencies",
+            message: sentence("cmd.open.noViewer"),
           };
         }
         return await app.commands!.execute(`plugin.${viewer}.open`, {
@@ -60,21 +71,24 @@ export function registerCommands(ctx: PluginContext): void {
 
   sub(
     app.commands.register("refresh", {
-      description: "Re-list the active (or specified) file tree from disk.",
+      description: sentence("cmd.refresh.desc"),
       triggers: { ko: "새로고침 갱신 다시읽기" },
       params: {
-        project: { type: "string", description: "Project id (default: active)" },
+        project: {
+          type: "string",
+          description: { en: "Project id (default: active)", ko: "프로젝트 id (기본: 활성)" },
+        },
       },
       returns: "{ ok, project, follow }",
-      message: () => "Refreshed the file tree",
-      // Offered only while follow is off. With it on the tree already re-lists on every cwd
-      // change.
+      message: () => sentence("cmd.refresh.answer"),
+      // Offered only while follow is off. With it on the tree already re-lists on every cwd change,
+      // so suggesting it would be suggesting what is already happening.
       hint: (d) =>
         d.follow === false && typeof d.project === "string"
           ? [
               {
                 cmd: `sok plugin.soksak-plugin-file-tree.follow '{"project":"${d.project}","on":true}'`,
-                why: "Turn follow on to refresh on every terminal cwd change",
+                why: sentence("cmd.refresh.hint"),
               },
             ]
           : [],
@@ -91,15 +105,23 @@ export function registerCommands(ctx: PluginContext): void {
 
   sub(
     app.commands.register("follow", {
-      description:
-        "Toggle (or set) shell-cwd follow for the active file tree. Off lists the project root.",
+      description: sentence("cmd.follow.desc"),
       triggers: { ko: "cwd 추종 토글 따라가기 작업디렉토리" },
       params: {
-        project: { type: "string", description: "Project id (default: active)" },
-        on: { type: "boolean", description: "Explicit on/off (omit to toggle)" },
+        project: {
+          type: "string",
+          description: { en: "Project id (default: active)", ko: "프로젝트 id (기본: 활성)" },
+        },
+        on: {
+          type: "boolean",
+          description: {
+            en: "Explicit on/off (omit to toggle)",
+            ko: "켬/끔을 직접 지정 (생략하면 뒤집습니다)",
+          },
+        },
       },
       returns: "{ ok, follow, project }",
-      message: (d) => (d.follow ? "Following the terminal cwd" : "No longer following the terminal cwd"),
+      message: (d) => sentence(d.follow ? "cmd.follow.on" : "cmd.follow.off"),
       // Offered only just after turning it on: the directory being followed can be seen at once.
       // Turning it off has no follow-up.
       hint: (d) =>
@@ -107,7 +129,7 @@ export function registerCommands(ctx: PluginContext): void {
           ? [
               {
                 cmd: `sok plugin.soksak-plugin-file-tree.refresh '{"project":"${d.project}"}'`,
-                why: "Refresh now to see the directory being followed",
+                why: sentence("cmd.refresh.answer"),
               },
             ]
           : [],

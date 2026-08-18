@@ -1,6 +1,8 @@
 // This plugin's entry — one ESM the loader imports through a blob URL, bundled by esbuild.
-// It owns a file tree that stands beside the work (registerView "tree") and nothing else. Opening
-// a file is delegated to whichever plugin draws that kind of file.
+//
+// It owns a file tree that stands beside the work (registerView "tree") and nothing else. Opening a
+// file is delegated to whichever plugin declared it draws that kind of file; drawing one is not
+// this plugin's business.
 import { createRoot, type Root } from "react-dom/client";
 import { gitProvider } from "./git";
 import { Tree } from "./tree";
@@ -57,7 +59,8 @@ export default {
           },
           // Only the followed pane changed, so this re-renders into the same root: React
           // reconciles, the cwd effect runs again, and the tree data stays unless the cwd really
-          // moved. A remount rebuilt all of it — measured at about 36ms every tab switch.
+          // moved. Which folders are open and where the view is scrolled survive it. A remount
+          // rebuilt all of that — measured at about 36ms every tab switch.
           update(container: HTMLElement, vctx: PluginViewContext) {
             const root = roots.get(container);
             if (root) root.render(<Tree app={app} ctx={vctx} gitPlugin={gitPlugin} />);

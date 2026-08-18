@@ -1,8 +1,12 @@
-// The file tree that stands beside the work. Loaded lazily and reconciled from the OS watcher.
-// Declared surfaces only: app.fs.list/watch, a git plugin's status command for the decorations,
-// app.terminal for the cwd it follows, ui.intent.open to open a file.
-// Colours come from the host's CSS variables (A10). Whether it follows the terminal is a header
-// toggle, kept per project in app.data.
+// The file tree that stands beside the work.
+//
+// Loaded lazily and reconciled from the OS watcher rather than re-listed: a directory is read when
+// it is opened, and a change reconciles that directory alone.
+//
+// Everything it reaches for is a declared surface — app.fs.list/watch, a git plugin's status
+// command for the decorations, app.terminal for the cwd it follows. Colours come from the host's
+// CSS variables (A10). Whether it follows the terminal is a header toggle, kept per project in
+// app.data.
 import {
   type CSSProperties,
   memo,
@@ -25,7 +29,7 @@ import { t as translate } from "./i18n";
 import { setTree, clearTree } from "./treeReg";
 import type { Disposable, Listing, PluginApi, PluginViewContext } from "./host";
 
-const PH = "​"; // An invisible child, so an empty folder can still be opened. No real file collides with it.
+const PH = "​"; // An invisible child, so an empty folder can still be opened. No real file can collide with it.
 const EMPTY_PATHS: readonly string[] = [];
 
 const TREE_SCROLLBAR_CSS = `
@@ -65,9 +69,10 @@ function detectDark(): boolean {
 
 // ── The lazy tree ───────────────────────────────────────────────────────────
 
-// Memoised: a re-render caused by the followed pane changing stops here when the tree's own
-// inputs are the same, so the canvas is rebuilt only when the file data moved. Every prop has to
-// be a stable reference for that. Without it the tree was redrawn on every tab switch.
+// Memoised: a re-render caused by the followed pane changing stops here when the tree's own inputs
+// are the same, so the canvas is rebuilt only when the file data really moved. Every prop has to be
+// a stable reference for that — onFsChange below is a useCallback for this reason. Without it the
+// tree was redrawn on every tab switch.
 const LazyTree = memo(function LazyTree({
   app,
   rootAbs,
@@ -93,10 +98,11 @@ const LazyTree = memo(function LazyTree({
         ...(themeToTreeStyles(theme) as CSSProperties),
         "--trees-padding-inline-override": "2px",
         "--trees-item-padding-x-override": "2px",
-        // The tree's colours are bound to the app's own CSS variables. Through themeToTreeStyles
-        // alone the library's built-in light default leaked through — a #f8f8f8 sidebar beside a
-        // #f5f5f7 app — because its fallbacks won where the theme said nothing. These are var()
-        // references, so a theme change follows without reading or recomputing anything.
+        // The tree's colours are bound to the app's own CSS variables. Through
+        // themeToTreeStyles alone the library's built-in light default leaked through — a
+        // #f8f8f8 sidebar beside a #f5f5f7 app — because its fallbacks won where the theme said
+        // nothing. These are var() references, so a theme change follows without reading or
+        // recomputing anything.
         "--trees-bg-override": "var(--bg)",
         "--trees-bg-muted-override": "var(--inset)",
         "--trees-fg-override": "var(--fg)",
@@ -366,8 +372,8 @@ export function Tree({
     };
   }, [app, projectId]);
 
-  // With follow on and a pane to follow, this tracks that pane's cwd. With it off nothing is
-  // subscribed.
+  // With follow on and a pane to follow, this tracks that pane's cwd — the value now and every
+  // change after. With it off nothing is subscribed.
   useEffect(() => {
     if (!follow || !paneId) {
       setCwd(undefined);
@@ -379,7 +385,7 @@ export function Tree({
   }, [app, follow, paneId]);
 
   // The decorations refresh when a terminal command finishes, whether or not this tree follows
-  // that terminal.
+  // that terminal. A person does not have to ask.
   useEffect(() => {
     if (!paneId) return;
     const offCmd = app.terminal?.onCommandFinished?.(paneId, () =>
@@ -400,7 +406,7 @@ export function Tree({
     let cancelled = false;
     const list = app.fs?.list;
     if (!list) {
-      setError("no permission to read files");
+      setError(translate("noReadPermission", lang));
       return;
     }
     void list(effectiveRoot)
@@ -418,9 +424,9 @@ export function Tree({
     };
   }, [app, effectiveRoot, nonce]);
 
-  // The decorations come from whichever plugin implements the git contract, found by that
-  // contract and never by name (C3 L2). With none installed they are empty: a file tree without
-  // git is still a file tree.
+  // The decorations come from whichever plugin implements the git contract, found by that contract
+  // and never by name (C3 L2). With none installed the decorations are simply empty: a file tree
+  // without git is still a file tree.
   useEffect(() => {
     const r = listing?.root;
     const exec = app.commands?.execute;
@@ -461,7 +467,7 @@ export function Tree({
     [app],
   );
   // A stable reference, or LazyTree's memo never holds: written inline this is a new function
-  // every render.
+  // every render, and the tree is redrawn each time the followed pane changes.
   const onFsChange = useCallback(() => setGitNonce((n) => n + 1), []);
 
   const followRef = useRef(follow);
@@ -502,8 +508,8 @@ export function Tree({
             title={translate(follow ? "followOn" : "followOff", lang)}
             onClick={toggleFollow}
           >
-            {/* lucide "pin" — following is pinned to something. Same stroke and size as the host's
-                own icons. */}
+            {/* lucide "pin" — following is pinned to something. Same stroke and size as the
+                host's own icons. */}
             <svg
               viewBox="0 0 24 24"
               fill="none"

@@ -1,4 +1,5 @@
-// The mounted tree views, by handle — what files.refresh and files.follow act on.
+// The mounted tree views, by handle — what files.refresh and files.follow act on, either the
+// active tree or the one a projectId names.
 export interface TreeHandle {
   refresh: () => void;
   setFollow: (on: boolean) => void;

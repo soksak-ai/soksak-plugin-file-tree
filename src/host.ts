@@ -1,13 +1,13 @@
 // The part of the host API this plugin uses, declared here rather than imported: this is its own
-// repository and depends on no core source (A7). A surface whose permission was not declared is
-// undefined at runtime.
+// repository and it depends on no core source (A7). Same shape as soksak-plugin-spec v1's app.*; a
+// surface whose permission was not declared is undefined at runtime.
 
 export interface Disposable {
   dispose(): void;
 }
 
 // Same shape as the core's viewRegistry.PluginViewContext. paneId is the terminal pane being
-// followed, or null.
+// followed (cwdPaneOf), or null.
 export interface PluginViewContext {
   projectId: string;
   root: string | null;
@@ -23,17 +23,22 @@ export interface PluginViewProvider {
   update?(container: HTMLElement, ctx: PluginViewContext): void;
 }
 
+/** Text a person reads: one string standing for every language, or a language map the host resolves
+ *  against whoever asked. Same shape as the host's LocalizedText. */
+export type Text = string | Record<string, string>;
+
 export interface ParamSpec {
   type: string;
-  description?: string;
+  description?: Text;
   required?: boolean;
 }
 
-// A follow-up worth knowing about — the core's CommandHint. cmd is the line, why is one sentence
-// on what it is for. A suggestion and not an instruction: whoever reads it may ignore it.
+// A follow-up worth knowing about — same shape as the core's CommandHint. cmd is the line, why is
+// one sentence on what it is for. A suggestion and not an instruction: whoever reads it, person or
+// agent, may ignore it or do something else.
 export interface CommandHint {
   cmd: string;
-  why: string;
+  why: Text;
 }
 
 // The caller's context — the core's CommandContext, in the part this plugin reads.
@@ -46,12 +51,16 @@ export interface CommandContext {
 }
 
 export interface PluginCommandSpec {
-  description: string;
+  // Read by a person in the palette and in `sok` help, and by an agent discovering the command.
+  // Handed over unresolved: the host is the only one that knows who asked, and this is registered
+  // once and read by every caller after.
+  description: Text;
   triggers?: Record<string, string>;
   params?: Record<string, ParamSpec>;
   returns?: string;
-  message?: (data: Record<string, unknown>) => string;
-  // Offered on success: what is worth doing next when this command worked. At most three.
+  message?: (data: Record<string, unknown>) => Text;
+  // Offered on success: what is worth doing next when this command worked. At most three — the
+  // core takes the first of them.
   hint?: (data: Record<string, unknown>, ctx: CommandContext) => CommandHint[];
   handler: (params: Record<string, unknown>) => Promise<object> | object;
 }

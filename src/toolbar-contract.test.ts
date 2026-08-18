@@ -1,5 +1,7 @@
-// The shared second row (core PLUGIN-CONTRACT §Toolbar row). A sidebar's upper row reads the same
-// token as a panel toolbar, --toolbar-h. Reinventing the height is what put it 5px off.
+// The shared second row (core PLUGIN-CONTRACT §Toolbar row).
+//
+// A sidebar's upper row reads the same token as a panel toolbar, --toolbar-h. Reinventing the
+// height or reading another token is what put this row 5px off the panel beside it.
 import { describe, expect, it } from "vitest";
 import { GLOBAL_CSS } from "./styles";
 

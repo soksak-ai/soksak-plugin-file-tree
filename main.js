@@ -21901,21 +21901,54 @@ function themeToTreeStyles(theme) {
 }
 
 // src/i18n.ts
-var EN = {
-  loading: "Loading\u2026",
-  refresh: "Refresh",
-  followOn: "Follow terminal cwd (on)",
-  followOff: "Follow terminal cwd (off \u2014 project root)"
-};
-var KO = {
-  loading: "\uBD88\uB7EC\uC624\uB294 \uC911\u2026",
-  refresh: "\uC0C8\uB85C\uACE0\uCE68",
-  followOn: "\uD130\uBBF8\uB110 cwd \uCD94\uC885(\uCF1C\uC9D0)",
-  followOff: "\uD130\uBBF8\uB110 cwd \uCD94\uC885(\uAEBC\uC9D0 \u2014 \uD504\uB85C\uC81D\uD2B8 \uB8E8\uD2B8)"
+var MESSAGES = {
+  loading: { en: "Loading\u2026", ko: "\uBD88\uB7EC\uC624\uB294 \uC911\u2026" },
+  refresh: { en: "Refresh", ko: "\uC0C8\uB85C\uACE0\uCE68" },
+  followOn: { en: "Follow terminal cwd (on)", ko: "\uD130\uBBF8\uB110 cwd \uCD94\uC885(\uCF1C\uC9D0)" },
+  followOff: {
+    en: "Follow terminal cwd (off \u2014 project root)",
+    ko: "\uD130\uBBF8\uB110 cwd \uCD94\uC885(\uAEBC\uC9D0 \u2014 \uD504\uB85C\uC81D\uD2B8 \uB8E8\uD2B8)"
+  },
+  noReadPermission: { en: "No permission to read files", ko: "\uD30C\uC77C\uC744 \uC77D\uC744 \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4" },
+  "cmd.ping.desc": {
+    en: "Answer with this plugin's version, to show it is loaded and reachable.",
+    ko: "\uC774 \uD50C\uB7EC\uADF8\uC778\uC774 \uC801\uC7AC\uB418\uC5B4 \uB2FF\uC744 \uC218 \uC788\uC74C\uC744 \uBCF4\uC774\uB824\uACE0 \uBC84\uC804\uC744 \uB2F5\uD569\uB2C8\uB2E4."
+  },
+  "cmd.ping.answer": {
+    en: "The file tree plugin {version} is loaded",
+    ko: "\uD30C\uC77C \uD2B8\uB9AC \uD50C\uB7EC\uADF8\uC778 {version} \uC801\uC7AC\uB428"
+  },
+  "cmd.open.desc": {
+    en: "Open a file in a tab, through whichever plugin declared it draws that kind of file.",
+    ko: "\uADF8 \uC885\uB958\uC758 \uD30C\uC77C\uC744 \uADF8\uB9B0\uB2E4\uACE0 \uC120\uC5B8\uD55C \uD50C\uB7EC\uADF8\uC778\uC744 \uD1B5\uD574 \uD30C\uC77C\uC744 \uD0ED\uC73C\uB85C \uC5FD\uB2C8\uB2E4."
+  },
+  "cmd.open.answer": { en: "Opened the file", ko: "\uD30C\uC77C\uC744 \uC5F4\uC5C8\uC2B5\uB2C8\uB2E4" },
+  "cmd.open.noViewer": {
+    en: "no plugin is declared to open a file \u2014 add a viewer to dependencies",
+    ko: "\uD30C\uC77C\uC744 \uC5EC\uB294 \uD50C\uB7EC\uADF8\uC778\uC774 \uC120\uC5B8\uB418\uC5B4 \uC788\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4 \u2014 dependencies \uC5D0 \uBDF0\uC5B4\uB97C \uCD94\uAC00\uD558\uC2ED\uC2DC\uC624"
+  },
+  "cmd.refresh.desc": {
+    en: "Read the directory again and redraw the tree.",
+    ko: "\uB514\uB809\uD130\uB9AC\uB97C \uB2E4\uC2DC \uC77D\uC5B4 \uD2B8\uB9AC\uB97C \uB2E4\uC2DC \uADF8\uB9BD\uB2C8\uB2E4."
+  },
+  "cmd.refresh.answer": { en: "Refreshed the file tree", ko: "\uD30C\uC77C \uD2B8\uB9AC\uB97C \uC0C8\uB85C\uACE0\uCE68\uD588\uC2B5\uB2C8\uB2E4" },
+  "cmd.refresh.hint": {
+    en: "Turn follow on to refresh on every terminal cwd change",
+    ko: "\uD130\uBBF8\uB110 cwd \uBCC0\uACBD\uB9C8\uB2E4 \uC790\uB3D9\uC73C\uB85C \uC0C8\uB85C\uACE0\uCE68\uD558\uB824\uBA74 follow \uB97C \uCF24 \uC218 \uC788\uC2B5\uB2C8\uB2E4"
+  },
+  "cmd.follow.desc": {
+    en: "Follow the terminal's working directory, or stop following it and stand at the workspace root.",
+    ko: "\uD130\uBBF8\uB110\uC758 \uC791\uC5C5 \uB514\uB809\uD130\uB9AC\uB97C \uB530\uB77C\uAC00\uAC70\uB098, \uB530\uB77C\uAC00\uAE30\uB97C \uBA48\uCD94\uACE0 \uC6CC\uD06C\uC2A4\uD398\uC774\uC2A4 \uB8E8\uD2B8\uC5D0 \uC12D\uB2C8\uB2E4."
+  },
+  "cmd.follow.on": { en: "Following the terminal cwd", ko: "cwd \uCD94\uC885\uC744 \uCF30\uC2B5\uB2C8\uB2E4" },
+  "cmd.follow.off": { en: "No longer following the terminal cwd", ko: "cwd \uCD94\uC885\uC744 \uAED0\uC2B5\uB2C8\uB2E4" }
 };
 function t3(key, lang) {
-  const dict = lang === "ko" ? KO : EN;
-  return dict[key] ?? EN[key] ?? key;
+  const entry = MESSAGES[key];
+  return lang.startsWith("ko") ? entry.ko : entry.en;
+}
+function sentence(key) {
+  return MESSAGES[key];
 }
 
 // src/treeReg.ts
@@ -21982,10 +22015,11 @@ var LazyTree = (0, import_react3.memo)(function LazyTree2({
       ...themeToTreeStyles(theme),
       "--trees-padding-inline-override": "2px",
       "--trees-item-padding-x-override": "2px",
-      // The tree's colours are bound to the app's own CSS variables. Through themeToTreeStyles
-      // alone the library's built-in light default leaked through — a #f8f8f8 sidebar beside a
-      // #f5f5f7 app — because its fallbacks won where the theme said nothing. These are var()
-      // references, so a theme change follows without reading or recomputing anything.
+      // The tree's colours are bound to the app's own CSS variables. Through
+      // themeToTreeStyles alone the library's built-in light default leaked through — a
+      // #f8f8f8 sidebar beside a #f5f5f7 app — because its fallbacks won where the theme said
+      // nothing. These are var() references, so a theme change follows without reading or
+      // recomputing anything.
       "--trees-bg-override": "var(--bg)",
       "--trees-bg-muted-override": "var(--inset)",
       "--trees-fg-override": "var(--fg)",
@@ -22237,7 +22271,7 @@ function Tree({
     let cancelled = false;
     const list = app.fs?.list;
     if (!list) {
-      setError("fs:read \uAD8C\uD55C \uC5C6\uC74C");
+      setError(t3("noReadPermission", lang));
       return;
     }
     void list(effectiveRoot).then((l3) => {
@@ -22367,9 +22401,9 @@ var GLOBAL_CSS = `
 }
 .sk-files-header {
   flex: none;
-  /* 2\uD589 \uACF5\uB3D9 \uADF8\uB9AC\uB4DC(\uCF54\uC5B4 PLUGIN-CONTRACT \xA7Toolbar row) \u2014 2\uD589 \uB192\uC774\uC758 \uB2E8\uC77C \uC9C4\uC2E4\uC740
-     --toolbar-h \uB2E4. \uB808\uC77C\xB7\uD328\uB110\uC774 \uACF5\uB3D9\uC0AC\uC6A9\uD574\uC57C \uC218\uD3C9 \uADF8\uB9AC\uB4DC\uAC00 \uC774\uC5B4\uC9C4\uB2E4(\uACFC\uAC70 \uD5E4\uB354\uD589 \uD1A0\uD070 \uC18C\uBE44\uB294
-     \uD328\uB110 \uD234\uBC14(28)\uC640 5px \uC5B4\uAE0B\uB098\uB358 \uC2E4\uCE21 \uACB0\uD568). */
+  /* The shared second row (core PLUGIN-CONTRACT \xA7Toolbar row). --toolbar-h is the one source for
+     its height: the rail and the panels have to read the same token for the horizontal grid to
+     line up \u2014 measured, a header-row token here sat 5px off the panel toolbar at 28. */
   height: var(--toolbar-h, 28px);
   box-sizing: border-box;
   display: flex;
@@ -22388,7 +22422,8 @@ var GLOBAL_CSS = `
 }
 .sk-files-btn {
   flex: none;
-  /* \uC6B0\uCE21 \uD638\uC2A4\uD2B8 .icon-btn \uACFC \uB3D9\uC77C \uD328\uD134 \u2014 flex \uC815\uC0AC\uAC01 \uBC15\uC2A4 + svg \uC911\uC559\uC815\uB82C(\uAE00\uB9AC\uD504 baseline \uBB38\uC81C \uC81C\uAC70). */
+  /* The host's own .icon-btn pattern \u2014 a square flex box with the svg centred, which takes the
+     glyph baseline out of the arithmetic. */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22419,22 +22454,33 @@ function registerCommands(ctx) {
   const sub = (d3) => ctx.subscriptions.push(d3);
   sub(
     app.commands.register("ping", {
-      description: "Files plugin load/version check (E2E).",
+      description: sentence("cmd.ping.desc"),
       triggers: { ko: "\uD30C\uC77C \uD551 \uC801\uC7AC\uD655\uC778 \uBC84\uC804" },
       returns: "{ ok, version }",
-      message: (d3) => `\uD30C\uC77C \uD2B8\uB9AC \uD50C\uB7EC\uADF8\uC778 \uBC84\uC804 ${d3.version} \uC801\uC7AC\uB428`,
+      message: (d3) => {
+        const said = sentence("cmd.ping.answer");
+        const version = String(d3.version ?? "");
+        return {
+          en: said.en.replace("{version}", version),
+          ko: said.ko.replace("{version}", version)
+        };
+      },
       handler: () => ({ ok: true, version: "0.0.1" })
     })
   );
   sub(
     app.commands.register("open", {
-      description: "Open a file as content, through the viewer plugin this one declares as a dependency.",
+      description: sentence("cmd.open.desc"),
       triggers: { ko: "\uD30C\uC77C \uC5F4\uAE30 \uBCF4\uAE30" },
       params: {
-        path: { type: "string", description: "Absolute file path", required: true }
+        path: {
+          type: "string",
+          description: { en: "Absolute file path", ko: "\uC808\uB300 \uD30C\uC77C \uACBD\uB85C" },
+          required: true
+        }
       },
       returns: "{ ok }",
-      message: () => "\uD30C\uC77C\uC744 \uC5F4\uC5C8\uC2B5\uB2C8\uB2E4.",
+      message: () => sentence("cmd.open.answer"),
       // The host held a `ui.intent.open` that opened a path as a file tab. That tab kind is gone —
       // a file reaches the screen as a plugin view like anything else — so opening one is the work
       // of whichever plugin draws files. This names that plugin through `dependencies`, and refuses
@@ -22445,7 +22491,7 @@ function registerCommands(ctx) {
           return {
             ok: false,
             code: "TARGET_NOT_FOUND",
-            message: "\uD30C\uC77C\uC744 \uC5EC\uB294 \uD50C\uB7EC\uADF8\uC778\uC774 \uC120\uC5B8\uB418\uC5B4 \uC788\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4 \u2014 dependencies \uC5D0 \uBDF0\uC5B4\uB97C \uCD94\uAC00\uD558\uC2ED\uC2DC\uC624"
+            message: sentence("cmd.open.noViewer")
           };
         }
         return await app.commands.execute(`plugin.${viewer}.open`, {
@@ -22456,19 +22502,22 @@ function registerCommands(ctx) {
   );
   sub(
     app.commands.register("refresh", {
-      description: "Re-list the active (or specified) file tree from disk.",
+      description: sentence("cmd.refresh.desc"),
       triggers: { ko: "\uC0C8\uB85C\uACE0\uCE68 \uAC31\uC2E0 \uB2E4\uC2DC\uC77D\uAE30" },
       params: {
-        project: { type: "string", description: "Project id (default: active)" }
+        project: {
+          type: "string",
+          description: { en: "Project id (default: active)", ko: "\uD504\uB85C\uC81D\uD2B8 id (\uAE30\uBCF8: \uD65C\uC131)" }
+        }
       },
       returns: "{ ok, project, follow }",
-      message: () => "\uD30C\uC77C \uD2B8\uB9AC\uB97C \uC0C8\uB85C\uACE0\uCE68\uD588\uC2B5\uB2C8\uB2E4.",
-      // Offered only while follow is off. With it on the tree already re-lists on every cwd
-      // change.
+      message: () => sentence("cmd.refresh.answer"),
+      // Offered only while follow is off. With it on the tree already re-lists on every cwd change,
+      // so suggesting it would be suggesting what is already happening.
       hint: (d3) => d3.follow === false && typeof d3.project === "string" ? [
         {
           cmd: `sok plugin.soksak-plugin-file-tree.follow '{"project":"${d3.project}","on":true}'`,
-          why: "\uD130\uBBF8\uB110 cwd \uBCC0\uACBD\uB9C8\uB2E4 \uC790\uB3D9\uC73C\uB85C \uC0C8\uB85C\uACE0\uCE68\uD558\uB824\uBA74 follow \uB97C \uCF24 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+          why: sentence("cmd.refresh.hint")
         }
       ] : [],
       handler: (p3) => {
@@ -22483,20 +22532,29 @@ function registerCommands(ctx) {
   );
   sub(
     app.commands.register("follow", {
-      description: "Toggle (or set) shell-cwd follow for the active file tree. Off lists the project root.",
+      description: sentence("cmd.follow.desc"),
       triggers: { ko: "cwd \uCD94\uC885 \uD1A0\uAE00 \uB530\uB77C\uAC00\uAE30 \uC791\uC5C5\uB514\uB809\uD1A0\uB9AC" },
       params: {
-        project: { type: "string", description: "Project id (default: active)" },
-        on: { type: "boolean", description: "Explicit on/off (omit to toggle)" }
+        project: {
+          type: "string",
+          description: { en: "Project id (default: active)", ko: "\uD504\uB85C\uC81D\uD2B8 id (\uAE30\uBCF8: \uD65C\uC131)" }
+        },
+        on: {
+          type: "boolean",
+          description: {
+            en: "Explicit on/off (omit to toggle)",
+            ko: "\uCF2C/\uB054\uC744 \uC9C1\uC811 \uC9C0\uC815 (\uC0DD\uB7B5\uD558\uBA74 \uB4A4\uC9D1\uC2B5\uB2C8\uB2E4)"
+          }
+        }
       },
       returns: "{ ok, follow, project }",
-      message: (d3) => d3.follow ? "cwd \uCD94\uC885\uC744 \uCF30\uC2B5\uB2C8\uB2E4." : "cwd \uCD94\uC885\uC744 \uAED0\uC2B5\uB2C8\uB2E4.",
+      message: (d3) => sentence(d3.follow ? "cmd.follow.on" : "cmd.follow.off"),
       // Offered only just after turning it on: the directory being followed can be seen at once.
       // Turning it off has no follow-up.
       hint: (d3) => d3.follow === true && typeof d3.project === "string" ? [
         {
           cmd: `sok plugin.soksak-plugin-file-tree.refresh '{"project":"${d3.project}"}'`,
-          why: "\uC9C0\uAE08 \uC0C8\uB85C\uACE0\uCE68\uD558\uBA74 \uCD94\uC885 \uC911\uC778 \uB514\uB809\uD1A0\uB9AC\uB97C \uBC14\uB85C \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+          why: sentence("cmd.refresh.answer")
         }
       ] : [],
       handler: (p3) => {
@@ -22556,7 +22614,8 @@ var plugin_entry_default = {
           },
           // Only the followed pane changed, so this re-renders into the same root: React
           // reconciles, the cwd effect runs again, and the tree data stays unless the cwd really
-          // moved. A remount rebuilt all of it — measured at about 36ms every tab switch.
+          // moved. Which folders are open and where the view is scrolled survive it. A remount
+          // rebuilt all of that — measured at about 36ms every tab switch.
           update(container, vctx) {
             const root = roots.get(container);
             if (root) root.render(/* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Tree, { app, ctx: vctx, gitPlugin }));
