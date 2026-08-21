@@ -11,7 +11,8 @@
     "doctor": "soksak-plugin-doctor",
     "prepublishOnly": "npm run build && npm run doctor",
     "test": "vitest run",
-    "test-unit": "npm run typecheck && npm run test && npm run build"
+    "test-unit": "npm run typecheck && npm run test && npm run build",
+    "verify": "npm run test-unit && git diff --exit-code -- main.js"
   },
   "dependencies": {
     "@pierre/trees": "1.0.0-beta.4",
