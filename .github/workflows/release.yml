@@ -1,52 +1,63 @@
 name: release
-
 on:
   workflow_dispatch:
-
-permissions:
-  contents: read
-
 concurrency:
   group: release-${{ github.repository }}
   cancel-in-progress: false
-
+permissions:
+  contents: read
 jobs:
   release:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: soksak-plugins/soksak-plugin-file-tree
     steps:
-      - name: Check out the exact source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+          path: soksak-plugins/soksak-plugin-file-tree
+      - id: spec-ref
+        run: echo "commit=$(cat soksak-spec.ref)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          node-version: "22.12.0"
-          cache: "npm"
-      - run: npm ci --ignore-scripts
-      - run: npm test
-      - name: Build the release assets
-        run: node scripts/build-release.mjs --commit "$GITHUB_SHA" --out dist
-      - name: Bind publication to main and the exact checkout
-        run: node scripts/release-context.mjs
-      - name: Mint a least-privilege installation token
-        id: release-token
+          repository: soksak-ai/soksak-spec
+          ref: ${{ steps.spec-ref.outputs.commit }}
+          path: soksak-plugins/soksak-plugin-file-tree/.dependency/soksak-spec
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: soksak-plugins/soksak-plugin-file-tree/package.json
+          cache: npm
+          cache-dependency-path: soksak-plugins/soksak-plugin-file-tree/package-lock.json
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          package_json_file: soksak-plugins/soksak-plugin-file-tree/.dependency/soksak-spec/package.json
+      - name: Build the exact public spec
+        working-directory: soksak-plugins/soksak-plugin-file-tree/.dependency/soksak-spec
+        run: |
+          pnpm --config.node-linker=hoisted --config.symlink=false install --frozen-lockfile
+          pnpm build
+          test -z "$(find . -type l -print -quit)"
+      - name: Verify and build the plugin
+        run: |
+          npm ci
+          npm run verify
+      - name: Build and validate release documents
+        run: |
+          node .dependency/soksak-spec/packages/plugin-spec/release-template/build-release.mjs --commit "${{ github.sha }}" --out dist-release
+          node .dependency/soksak-spec/packages/plugin-spec/bin/validate.mjs release dist-release/release.json
+          node .dependency/soksak-spec/packages/plugin-spec/bin/validate.mjs conformance dist-release/conformance-*.json --release dist-release/release.json --plugin-manifest plugin.json
+      - id: release-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
         with:
           client-id: ${{ vars.SOKSAK_RELEASE_CLIENT_ID }}
           private-key: ${{ secrets.SOKSAK_RELEASE_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: soksak-plugin-file-tree
           permission-administration: read
           permission-contents: write
-      - name: Publish the verified owner manifest and assets
+      - name: Publish the canonical immutable release
         env:
           SOKSAK_RELEASE_TOKEN: ${{ steps.release-token.outputs.token }}
-        run: >-
-          node scripts/publish-release.mjs
-          --repository "$GITHUB_REPOSITORY"
-          --commit "$GITHUB_SHA"
-          --artifacts "$GITHUB_WORKSPACE/dist"
-          --manifest "$GITHUB_WORKSPACE/dist/release.json"
+          GH_TOKEN: ${{ steps.release-token.outputs.token }}
+        run: |
+          test "$(gh api "repos/${{ github.repository }}/immutable-releases" --jq '.enabled and .enforced_by_owner')" = true || { echo "owner-enforced immutable releases must be enabled before tagging" >&2; exit 1; }
+          node .dependency/soksak-spec/packages/plugin-spec/release-template/publish-canonical-release.mjs --repository "${{ github.repository }}" --commit "${{ github.sha }}" --artifacts "$PWD/dist-release" --manifest "$PWD/dist-release/release.json"

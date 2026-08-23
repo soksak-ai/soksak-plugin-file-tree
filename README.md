@@ -35,7 +35,7 @@ instead: `open {path}` opens any file, and `refresh` re-lists the tree.
 
 ## Permissions
 
-`ui`, `fs:read`, `git:read`, `terminal`, `data`, `commands`
+`ui`, `fs:read`, `terminal`, `data`, `commands`
 
 ## Dependencies
 
@@ -47,6 +47,6 @@ files; with none installed, opening a file shows an empty viewer.
 ## Build
 
 ```
-npm install
-npm run build   # → main.js
+npm ci
+npm run verify
 ```

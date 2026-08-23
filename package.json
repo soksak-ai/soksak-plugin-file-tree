@@ -3,35 +3,34 @@
   "private": true,
   "version": "0.0.2",
   "type": "module",
-  "description": "soksak file-tree plugin \u2014 left sidebar file explorer tree",
+  "engines": {
+    "node": "26.7.0"
+  },
+  "packageManager": "npm@11.19.0",
+  "description": "soksak file-tree plugin — left sidebar file explorer tree",
   "scripts": {
     "build": "node build.mjs",
     "dev": "node build.mjs --watch",
     "typecheck": "tsc --noEmit",
-    "doctor": "soksak-plugin-doctor",
-    "prepublishOnly": "npm run build && npm run doctor",
-    "test": "vitest run",
+    "test": "node --test scripts/*.node.mjs && vitest run",
     "test-unit": "npm run typecheck && npm run test && npm run build",
-    "verify": "npm run test-unit && git diff --exit-code -- main.js"
+    "verify": "npm audit --audit-level=low && npm run test-unit && git diff --exit-code -- main.js"
   },
   "dependencies": {
     "@pierre/trees": "1.0.0-beta.4",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "esbuild": "^0.24.2",
-    "typescript": "~5.9.3",
-    "vitest": "^2.1.8",
-    "soksak-plugin-doctor": "github:soksak-ai/soksak-plugin-doctor"
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
   },
-  "soksakRelease": {
-    "kind": "plugin",
-    "id": "soksak-plugin-file-tree",
-    "repository": "https://github.com/soksak-ai/soksak-plugin-file-tree",
-    "manifest": "release.json"
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true
   }
 }
