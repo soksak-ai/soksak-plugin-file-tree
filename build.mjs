@@ -24,7 +24,7 @@ const opts = {
     __PLUGIN_VERSION__: JSON.stringify(manifest.version),
   },
   outfile: "main.js",
-  minify: false,
+  minify: true,
   legalComments: "none",
   logLevel: "info",
 };

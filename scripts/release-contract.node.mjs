@@ -1,6 +1,7 @@
 // Node's test runner owns release and repository contracts; Vitest owns browser source tests.
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
+import { statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -32,6 +33,7 @@ test("the file tree owner declares one current release contract", () => {
   assert.match(read("soksak-spec.ref").trim(), /^[a-f0-9]{40}$/);
   assert.match(read("LICENSE"), /Apache License\s+Version 2\.0/);
   assert.ok(existsSync(join(root, "README.ko.md")));
+  assert.ok(statSync(join(root, "main.js")).size < 500_000, "production bundle exceeds 500 KB");
 });
 
 test("the release workflow is manual and uses canonical tooling", () => {
