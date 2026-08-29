@@ -1,20 +1,20 @@
 {
   "name": "soksak-plugin-file-tree",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "engines": {
     "node": "26.7.0"
   },
-  "packageManager": "npm@11.19.0",
+  "packageManager": "pnpm@11.22.0",
   "description": "soksak file-tree plugin — left sidebar file explorer tree",
   "scripts": {
     "build": "node build.mjs",
     "dev": "node build.mjs --watch",
     "typecheck": "tsc --noEmit",
     "test": "node --test scripts/*.node.mjs && vitest run",
-    "test-unit": "npm run typecheck && npm run test && npm run build",
-    "verify": "npm audit --audit-level=low && npm run test-unit && git diff --exit-code -- main.js"
+    "test-unit": "pnpm typecheck && pnpm test",
+    "verify": "pnpm typecheck && pnpm test && node build.mjs --check"
   },
   "dependencies": {
     "@pierre/trees": "1.0.0-beta.4",
@@ -28,9 +28,5 @@
     "esbuild": "0.28.2",
     "typescript": "5.9.3",
     "vitest": "3.2.7"
-  },
-  "allowScripts": {
-    "esbuild@0.28.2": true,
-    "fsevents@2.3.3": true
   }
 }
