@@ -15,6 +15,6 @@ repository를 탐색하지 않습니다.
 
 ## Build와 release
 
-Node와 npm version, dependency version은 `package.json`이 정확히 소유합니다. `npm run verify`는
-typecheck, test, bundle build, `main.js` drift를 검증합니다. Immutable release는 `soksak-spec.ref`의
-정확한 public spec과 canonical release template로 생성합니다.
+Node와 pnpm version, dependency version은 `.node-version`과 `package.json`이 정확히 소유합니다.
+`make verify`는 typecheck, test와 canonical `main.js` byte를 검증합니다. `make attest`는 SDK와 Spec
+receipt를 포함한 immutable release를 생성하며 local store에는 kind/id/version별로 공개합니다.

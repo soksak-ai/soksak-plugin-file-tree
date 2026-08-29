@@ -47,6 +47,6 @@ files; with none installed, opening a file shows an empty viewer.
 ## Build
 
 ```
-npm ci
-npm run verify
+make verify
+make attest STORE=/absolute/local-release-store OUT=/absolute/release-output
 ```
