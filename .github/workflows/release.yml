@@ -26,12 +26,12 @@ jobs:
           path: soksak-plugins/soksak-plugin-file-tree/.dependency/soksak-spec
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version-file: soksak-plugins/soksak-plugin-file-tree/package.json
-          cache: npm
-          cache-dependency-path: soksak-plugins/soksak-plugin-file-tree/package-lock.json
+          node-version-file: soksak-plugins/soksak-plugin-file-tree/.node-version
+          cache: pnpm
+          cache-dependency-path: soksak-plugins/soksak-plugin-file-tree/pnpm-lock.yaml
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
         with:
-          package_json_file: soksak-plugins/soksak-plugin-file-tree/.dependency/soksak-spec/package.json
+          package_json_file: soksak-plugins/soksak-plugin-file-tree/package.json
       - name: Build the exact public spec
         working-directory: soksak-plugins/soksak-plugin-file-tree/.dependency/soksak-spec
         run: |
@@ -39,9 +39,7 @@ jobs:
           pnpm build
           test -z "$(find . -type l -print -quit)"
       - name: Verify and build the plugin
-        run: |
-          npm ci
-          npm run verify
+        run: make verify
       - name: Build and validate release documents
         run: |
           node .dependency/soksak-spec/packages/plugin-spec/release-template/build-release.mjs --commit "${{ github.sha }}" --out dist-release
