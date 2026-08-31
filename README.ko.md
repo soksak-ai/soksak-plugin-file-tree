@@ -1,7 +1,7 @@
 # soksak-plugin-file-tree
 
-Soksak의 side surface에 표시되는 file explorer tree입니다. Code와 text file은 설치된 viewer로
-열고 media file도 해당 viewer plugin에 위임합니다. 이 plugin은 tree만 소유합니다.
+Soksak의 side surface에 표시되는 file explorer tree입니다. 이 Plugin은 tree를 소유합니다. Manifest에
+viewer Plugin 구현이 선언된 경우에만 해당 Plugin에 파일 열기를 요청합니다.
 
 ## 제공 항목
 
@@ -10,8 +10,12 @@ Soksak의 side surface에 표시되는 file explorer tree입니다. Code와 text
 - Command: `open`, `refresh`, `follow`, `ping`
 - Permission: `ui`, `fs:read`, `terminal`, `data`, `commands`
 
-File open은 Core의 공개 command를 통해 설치된 viewer에 위임합니다. Checkout이나 특정 viewer
-repository를 탐색하지 않습니다.
+File open은 `runtimeDependencies.plugins`에 선언된 viewer Plugin을 호출합니다. 선언된 viewer가 없으면
+command는 설치된 구현을 임의로 선택하지 않고 `TARGET_NOT_FOUND`를 반환합니다. 현재 manifest에는
+viewer Plugin이 선언되어 있지 않습니다.
+
+Plugin 구현 관계가 존재하면 정확한 `runtimeDependencies.plugins` 참조에서만 읽습니다. 제거된
+`dependencies` 필드는 허용하지 않습니다.
 
 ## Build와 release
 

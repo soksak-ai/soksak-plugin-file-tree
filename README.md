@@ -1,7 +1,7 @@
 # soksak-plugin-file-tree
 
-A left-sidebar file explorer tree for soksak. Code and text files open in the editor; media
-files are handled by a separate media-viewer plugin — this plugin owns only the tree.
+A left-sidebar file explorer tree for soksak. This plugin owns the tree. It requests file
+opening from a viewer Plugin only when that implementation is declared in its manifest.
 
 ## What it provides
 
@@ -11,13 +11,13 @@ files are handled by a separate media-viewer plugin — this plugin owns only th
   tracks the focused terminal pane's working directory (`ctx.paneId` + `app.terminal`); the
   state persists per project.
 
-Opening a file routes through the core `editor.open` command, so the skeleton picks whatever
-viewer is registered for that file type (engine neutrality, contract A13). Theme follows the
-host through CSS variables and `theme.changed`.
+Opening a file calls the viewer Plugin declared in `runtimeDependencies.plugins`. With no
+declared viewer, the command returns `TARGET_NOT_FOUND`. Theme follows the host through CSS
+variables and `theme.changed`.
 
 ## Commands
 
-- `file-tree.open {path}` — open a file as content (via `editor.open`)
+- `file-tree.open {path}` — request file opening from the declared viewer Plugin
 - `file-tree.refresh {project?}` — re-list the active (or specified) tree from disk; returns `{ ok, project, follow }`
 - `file-tree.follow {project?, on?}` — toggle/set shell-cwd follow; returns `{ ok, follow, project }`
 - `file-tree.ping` — load/version check
@@ -39,10 +39,11 @@ instead: `open {path}` opens any file, and `refresh` re-lists the tree.
 
 ## Dependencies
 
-None. The tree opens files only through the core `editor.open` command; whatever file
-viewer is installed (an editor engine, the media viewer, …) renders them. The tree is not
-tied to any specific viewer engine (A13). Install a viewer plugin separately to see opened
-files; with none installed, opening a file shows an empty viewer.
+The current manifest declares none. Without a declared viewer Plugin, `open` returns
+`TARGET_NOT_FOUND` instead of selecting an installed implementation implicitly.
+
+Plugin implementation relationships, when present, are read only from exact
+`runtimeDependencies.plugins` references. The removed `dependencies` field is not accepted.
 
 ## Build
 

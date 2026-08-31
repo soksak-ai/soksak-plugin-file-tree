@@ -1,7 +1,4 @@
-// The git seam — the tree asks whoever implements soksak-spec-plugin-git, and finds it by contract.
-//
-// The provider id handed to these tests is deliberately not the one that ships: if an implementer's
-// name were written anywhere in this plugin, they could not pass.
+// Git decoration uses the plugin reference declared by this plugin's manifest.
 import { describe, expect, it } from "vitest";
 import { gitDecorations, gitProvider } from "./git";
 
@@ -28,12 +25,14 @@ describe("the git provider", () => {
   });
 
   it("is null when the manifest declares no git plugin", () => {
-    expect(gitProvider({ dependencies: {} })).toBeNull();
+    expect(gitProvider({ runtimeDependencies: {} })).toBeNull();
     expect(gitProvider(null)).toBeNull();
   });
 
   it("is the declared id when there is one", () => {
-    expect(gitProvider({ dependencies: { [PROVIDER]: "0.0.1" } })).toBe(PROVIDER);
+    expect(gitProvider({
+      runtimeDependencies: { plugins: [{ id: PROVIDER, version: "0.0.1" }] },
+    })).toBe(PROVIDER);
   });
 });
 

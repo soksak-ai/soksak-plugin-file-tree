@@ -3,15 +3,15 @@
 import type { PluginContext } from "./host";
 import { sentence } from "./i18n";
 import { resolveTree, resolveTreeKey } from "./treeReg";
+import { runtimePluginReferences } from "./runtimeDependencies";
 
 // build.mjs injects plugin.json's version. One source for it — a hardcoded copy drifts the day the
 // manifest is bumped and nothing says which of the two is the version.
 declare const __PLUGIN_VERSION__: string;
 
-/** The viewer this plugin was given, read from its own manifest. null = none was declared. */
-function declaredViewer(manifest: unknown): string | null {
-  const deps = (manifest as { dependencies?: Record<string, string> } | null)?.dependencies;
-  return Object.keys(deps ?? {})[0] ?? null;
+/** The viewer this plugin was given through runtimeDependencies.plugins. null = none was declared. */
+export function declaredViewer(manifest: unknown): string | null {
+  return runtimePluginReferences(manifest).find((dependency) => !dependency.id.includes("git"))?.id ?? null;
 }
 
 export function registerCommands(ctx: PluginContext): void {
@@ -51,7 +51,7 @@ export function registerCommands(ctx: PluginContext): void {
       message: () => sentence("cmd.open.answer"),
       // The host held a `ui.intent.open` that opened a path as a file tab. That tab kind is gone —
       // a file reaches the screen as a plugin view like anything else — so opening one is the work
-      // of whichever plugin draws files. This names that plugin through `dependencies`, and refuses
+      // of whichever plugin draws files. This names that plugin through `runtimeDependencies`, and refuses
       // by name when none is declared rather than answering as though a file had opened.
       handler: async (p) => {
         const viewer = declaredViewer(ctx.manifest);
