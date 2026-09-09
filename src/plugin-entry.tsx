@@ -54,6 +54,7 @@ export default {
     if (app.ui?.registerView) {
       ctx.subscriptions.push(
         app.ui.registerView("tree", {
+          restores: "none",
           mount(container: HTMLElement, vctx: PluginViewContext) {
             mountInto(container, <Tree app={app} ctx={vctx} gitPlugin={gitPlugin} />);
           },
